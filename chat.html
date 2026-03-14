@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coach IA — Bravoo</title>
+  <!--
+    SUPABASE CONFIG (Benjamin doit créer un projet et ajouter ces valeurs) :
+    const SUPABASE_URL = 'https://xxxxx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbxxxxxx';
+    
+    Quand ces valeurs sont renseignées, décommenter les blocs Supabase dans le JS.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-page: #121212;
+      --bg-surface: #181818;
+      --bg-surface-hover: #282828;
+      --primary: #1DB954;
+      --primary-light: #1ED760;
+      --accent: #F5C518;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B3B3B3;
+      --text-muted: #727272;
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --green: #22c55e;
+      --red: #ef4444;
+      --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: var(--bg-page);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* HEADER */
+    .header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+
+    .back-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .back-btn:hover {
+      transform: scale(1.05);
+      background: var(--bg-surface-hover);
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* CHAT AREA */
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px;
+      padding-bottom: 90px;
+    }
+
+    .chat-container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .message {
+      margin-bottom: 16px;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInMessage 0.4s ease-out forwards;
+    }
+
+    @keyframes fadeInMessage {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-assistant {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .message-user {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .message-bubble {
+      max-width: 85%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    .message-assistant .message-bubble {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-top-left-radius: 4px;
+      color: var(--text-primary);
+    }
+
+    .message-user .message-bubble {
+      background: var(--primary);
+      color: var(--text-primary);
+      border-top-right-radius: 4px;
+      font-weight: 700;
+    }
+
+    /* COURSE BLOCK */
+    .course-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      max-width: 85%;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInMessage 0.4s ease-out forwards;
+    }
+
+    .course-header {
+      padding: 14px 16px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: var(--text-primary);
+      font-weight: 900;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .course-content {
+      padding: 14px 16px;
+    }
+
+    .course-bullet {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    .course-bullet:last-child {
+      margin-bottom: 0;
+    }
+
+    .course-bullet-icon {
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    /* QUIZ BLOCK */
+    .quiz-block {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      max-width: 85%;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInMessage 0.4s ease-out forwards;
+    }
+
+    .quiz-header {
+      padding: 12px 16px;
+      background: rgba(29, 185, 84, 0.1);
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .quiz-content {
+      padding: 14px 16px;
+    }
+
+    .quiz-question {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .quiz-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-choice {
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 2px solid var(--border-subtle);
+      background: var(--bg-page);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-primary);
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quiz-choice:hover {
+      border-color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    .quiz-choice-letter {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: rgba(29, 185, 84, 0.1);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .quiz-choice.correct {
+      border-color: var(--green);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .quiz-choice.correct .quiz-choice-letter {
+      background: var(--green);
+      color: var(--text-primary);
+    }
+
+    .quiz-choice.wrong {
+      border-color: var(--red);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .quiz-choice.wrong .quiz-choice-letter {
+      background: var(--red);
+      color: var(--text-primary);
+    }
+
+    .quiz-explanation {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .quiz-explanation.correct {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .quiz-explanation.wrong {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* INPUT AREA */
+    .input-area {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      z-index: 100;
+    }
+
+    .input-container {
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input-field {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 2px solid var(--border-subtle);
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--font-family);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+    }
+
+    .send-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: none;
+      background: var(--primary);
+      color: var(--text-primary);
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .send-btn:hover {
+      background: var(--primary-light);
+      transform: scale(1.05);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* BOTTOM NAV (hidden on chat page, but could be added) */
+    .bottom-nav {
+      display: none;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 480px) {
+      .chat-area {
+        padding: 16px;
+        padding-bottom: 90px;
+      }
+
+      .header {
+        padding: 14px 16px;
+      }
+
+      .message-bubble {
+        max-width: 90%;
+      }
+
+      .course-block,
+      .quiz-block {
+        max-width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <div class="header">
+    <a href="dashboard.html" class="back-btn">←</a>
+    <div class="header-title">
+      🧠 Coach Bravoo
+    </div>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="chat-area" id="chatArea">
+    <div class="chat-container" id="chatContainer"></div>
+  </div>
+
+  <!-- INPUT AREA -->
+  <div class="input-area">
+    <div class="input-container">
+      <input type="text" class="input-field" id="inputField" placeholder="Pose ta question..." disabled>
+      <button class="send-btn" id="sendBtn" disabled>
+        ✉️
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // DONNÉES SIMULÉES
+    const MESSAGES = [
+      {
+        role: 'assistant',
+        type: 'text',
+        content: 'Salut {{prenom}} ! Aujourd\'hui on travaille sur les équations du 1er degré. Prêt(e) ?'
+      },
+      {
+        role: 'user',
+        type: 'text',
+        content: 'Oui, c\'est parti !'
+      },
+      {
+        role: 'assistant',
+        type: 'course',
+        title: '📐 Équations du 1er degré',
+        bullets: [
+          'Une équation du 1er degré, c\'est une égalité avec une inconnue (souvent x)',
+          'L\'objectif : isoler x d\'un côté pour trouver sa valeur',
+          'Exemple : 2x + 5 = 15 → 2x = 10 → x = 5',
+          'Règle d\'or : ce que tu fais d\'un côté, tu dois le faire de l\'autre'
+        ]
+      },
+      {
+        role: 'assistant',
+        type: 'quiz',
+        question: 'Résous cette équation : 3x + 7 = 22',
+        choices: ['x = 5', 'x = 7', 'x = 15', 'x = 10'],
+        correctIndex: 0,
+        explanation: 'Bien joué ! 3x + 7 = 22 → 3x = 15 → x = 5'
+      }
+    ];
+
+    let currentMessageIndex = 0;
+
+    // Récupérer le prénom depuis localStorage
+    function getUserName() {
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        try {
+          const data = JSON.parse(userData);
+          return data.prenom || 'toi';
+        } catch (e) {
+          return 'toi';
+        }
+      }
+      return 'toi';
+    }
+
+    // Afficher un message
+    function renderMessage(message, delay = 0) {
+      setTimeout(() => {
+        const container = document.getElementById('chatContainer');
+        const userName = getUserName();
+
+        if (message.type === 'text') {
+          const msgDiv = document.createElement('div');
+          msgDiv.className = `message message-${message.role}`;
+          msgDiv.innerHTML = `
+            <div class="message-bubble">
+              ${message.content.replace('{{prenom}}', userName)}
+            </div>
+          `;
+          container.appendChild(msgDiv);
+        }
+
+        if (message.type === 'course') {
+          const courseDiv = document.createElement('div');
+          courseDiv.className = 'course-block';
+          courseDiv.innerHTML = `
+            <div class="course-header">
+              ${message.title}
+            </div>
+            <div class="course-content">
+              ${message.bullets.map(b => `
+                <div class="course-bullet">
+                  <span class="course-bullet-icon">•</span>
+                  <span>${b}</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+          container.appendChild(courseDiv);
+        }
+
+        if (message.type === 'quiz') {
+          const quizDiv = document.createElement('div');
+          quizDiv.className = 'quiz-block';
+          quizDiv.innerHTML = `
+            <div class="quiz-header">❓ Quiz</div>
+            <div class="quiz-content">
+              <div class="quiz-question">${message.question}</div>
+              <div class="quiz-choices" id="quizChoices${currentMessageIndex}"></div>
+              <div id="quizExplanation${currentMessageIndex}"></div>
+            </div>
+          `;
+          container.appendChild(quizDiv);
+
+          const choicesContainer = document.getElementById(`quizChoices${currentMessageIndex}`);
+          const explanationContainer = document.getElementById(`quizExplanation${currentMessageIndex}`);
+
+          message.choices.forEach((choice, idx) => {
+            const choiceDiv = document.createElement('div');
+            choiceDiv.className = 'quiz-choice';
+            choiceDiv.innerHTML = `
+              <span class="quiz-choice-letter">${String.fromCharCode(65 + idx)}</span>
+              <span>${choice}</span>
+            `;
+            choiceDiv.addEventListener('click', () => {
+              handleQuizAnswer(idx, message.correctIndex, choiceDiv, choicesContainer, explanationContainer, message.explanation);
+            });
+            choicesContainer.appendChild(choiceDiv);
+          });
+        }
+
+        // Auto-scroll
+        const chatArea = document.getElementById('chatArea');
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }, delay);
+    }
+
+    // Gérer la réponse au quiz
+    function handleQuizAnswer(selectedIndex, correctIndex, choiceDiv, choicesContainer, explanationContainer, explanation) {
+      const isCorrect = selectedIndex === correctIndex;
+
+      // Désactiver tous les choix
+      const allChoices = choicesContainer.querySelectorAll('.quiz-choice');
+      allChoices.forEach((ch, idx) => {
+        ch.style.pointerEvents = 'none';
+        if (idx === correctIndex) {
+          ch.classList.add('correct');
+        } else if (idx === selectedIndex && !isCorrect) {
+          ch.classList.add('wrong');
+        }
+      });
+
+      // Afficher l'explication
+      const expDiv = document.createElement('div');
+      expDiv.className = `quiz-explanation ${isCorrect ? 'correct' : 'wrong'}`;
+      expDiv.textContent = explanation;
+      explanationContainer.appendChild(expDiv);
+
+      // Auto-scroll
+      setTimeout(() => {
+        const chatArea = document.getElementById('chatArea');
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }, 100);
+    }
+
+    // Afficher tous les messages initiaux
+    function loadInitialMessages() {
+      MESSAGES.forEach((msg, index) => {
+        renderMessage(msg, index * 800);
+        currentMessageIndex++;
+      });
+
+      // Après tous les messages, afficher le message "bientôt disponible"
+      setTimeout(() => {
+        const container = document.getElementById('chatContainer');
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'message message-assistant';
+        infoDiv.innerHTML = `
+          <div class="message-bubble">
+            Le coach IA sera disponible très bientôt ! En attendant, tu peux explorer ton programme depuis le tableau de bord 🎯
+          </div>
+        `;
+        container.appendChild(infoDiv);
+
+        const chatArea = document.getElementById('chatArea');
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }, MESSAGES.length * 800 + 1000);
+    }
+
+    // Gérer l'envoi de message (désactivé pour l'instant)
+    document.getElementById('inputField').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        alert('Le chat IA sera disponible très bientôt ! 🚀');
+      }
+    });
+
+    document.getElementById('sendBtn').addEventListener('click', () => {
+      alert('Le chat IA sera disponible très bientôt ! 🚀');
+    });
+
+    // INIT
+    loadInitialMessages();
+
+    // SUPABASE (à décommenter quand Benjamin aura configuré)
+    /*
+    const SUPABASE_URL = 'https://xxxxx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbxxxxxx';
+    
+    async function loadChatFromSupabase() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      // Charger l'historique de chat
+      const { data, error } = await supabase
+        .from('chat_history')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: true });
+      
+      if (data && data.length > 0) {
+        // Afficher les messages de l'historique
+        data.forEach(msg => {
+          renderMessage(msg, 0);
+        });
+      } else {
+        // Afficher les messages simulés
+        loadInitialMessages();
+      }
+    }
+    
+    // loadChatFromSupabase();
+    */
+  </script>
+</body>
+</html>
