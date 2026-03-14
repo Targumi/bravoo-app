@@ -68,7 +68,8 @@
     .chat-area {
       flex: 1;
       overflow-y: auto;
-      padding: 16px;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px 16px 80px 16px;
       max-width: 600px;
       width: 100%;
       margin: 0 auto;
@@ -94,6 +95,9 @@
       font-size: 14px;
       line-height: 1.6;
       font-weight: 500;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 100%;
     }
     
     .bubble-user {
@@ -105,6 +109,9 @@
       font-size: 14px;
       font-weight: 700;
       text-align: right;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 100%;
     }
     
     /* Course block */
@@ -352,7 +359,11 @@
     .action-btn.secondary {
       background: #181818;
       color: #FFFFFF;
-      border: 2px solid rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.15);
+    }
+    .action-btn.secondary:hover {
+      background: #282828;
+      border-color: rgba(255,255,255,0.25);
     }
     
     /* Quick actions */
@@ -484,7 +495,9 @@
     // Get user data
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const prenom = userData.firstName || 'toi';
-    document.getElementById('greetingText').textContent = `Salut ${prenom} !`;
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Bon matin' : hour < 18 ? 'Salut' : 'Bonsoir';
+    document.getElementById('greetingText').textContent = `${greeting} ${prenom} !`;
     
     // Chat messages data
     const messages = [

@@ -367,7 +367,7 @@
        ======================================== */
     .btn {
       width: 100%;
-      padding: 15px 24px;
+      padding: 16px 24px; min-height: 50px;
       border-radius: 12px;
       border: none;
       background: var(--primary);
@@ -464,6 +464,10 @@
       transform: translateY(-2px) scale(1.02);
       border-color: var(--primary);
       box-shadow: 0 8px 24px rgba(29, 185, 84, 0.2);
+    }
+    .chip:active {
+      transform: scale(0.97);
+      transition: transform 0.05s ease;
     }
 
     .chip.selected {
@@ -618,7 +622,8 @@
 
     .quiz-choice.selected {
       border-color: var(--primary);
-      background: rgba(29, 185, 84, 0.1);
+      background: rgba(29, 185, 84, 0.25);
+      color: #FFFFFF;
     }
 
     .quiz-choice.correct {
