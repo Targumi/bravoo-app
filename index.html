@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bravoo - Ton coach personnel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #121212;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Progress bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #181818;
+            z-index: 1000;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #1DB954;
+            transition: width 0.4s ease-out;
+            width: 0%;
+        }
+        
+        /* Logo */
+        .logo {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 800;
+            margin: 40px 0 60px 0;
+            letter-spacing: -1px;
+        }
+        
+        .logo .brav {
+            color: #fff;
+        }
+        
+        .logo .oo {
+            color: #1DB954;
+        }
+        
+        /* Steps container */
+        .step {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            animation: slideIn 0.4s ease-out;
+        }
+        
+        .step.active {
+            display: flex;
+        }
+        
+        .step.slide-out {
+            animation: slideOut 0.4s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        
+        @keyframes flipIn {
+            from {
+                opacity: 0;
+                transform: rotateX(-90deg);
+            }
+            to {
+                opacity: 1;
+                transform: rotateX(0);
+            }
+        }
+        
+        /* Typography */
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+        
+        h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+        
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #b3b3b3;
+            margin-bottom: 16px;
+        }
+        
+        /* Input */
+        .input-group {
+            margin-bottom: 24px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 16px 20px;
+            background: #181818;
+            border: 2px solid #282828;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #1DB954;
+            background: #1a1a1a;
+        }
+        
+        input::placeholder {
+            color: #666;
+        }
+        
+        /* Button */
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: #1DB954;
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-size: 17px;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: auto;
+        }
+        
+        .btn:hover {
+            background: #1ed760;
+            transform: scale(1.02);
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn:disabled {
+            background: #282828;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Cards grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        @media (min-width: 600px) {
+            .cards-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+        
+        .card {
+            background: #181818;
+            border: 2px solid #282828;
+            border-radius: 12px;
+            padding: 20px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .card:hover {
+            border-color: #1DB954;
+            background: #1a1a1a;
+        }
+        
+        .card.selected {
+            border-color: #1DB954;
+            background: rgba(29, 185, 84, 0.1);
+        }
+        
+        .card .emoji {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        /* Options list */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .option {
+            background: #181818;
+            border: 2px solid #282828;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        
+        .option:hover {
+            border-color: #1DB954;
+            background: #1a1a1a;
+        }
+        
+        .option.selected {
+            border-color: #1DB954;
+            background: rgba(29, 185, 84, 0.1);
+        }
+        
+        /* Shimmer text */
+        .shimmer {
+            background: linear-gradient(90deg, #fff 0%, #1DB954 50%, #fff 100%);
+            background-size: 200% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 2s linear infinite;
+        }
+        
+        /* Loading animation */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .progress-circle {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 40px;
+        }
+        
+        .progress-circle svg {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-circle circle {
+            fill: none;
+            stroke-width: 8;
+        }
+        
+        .progress-bg {
+            stroke: #282828;
+        }
+        
+        .progress-bar-circle {
+            stroke: #1DB954;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: 800;
+            color: #1DB954;
+        }
+        
+        .loading-message {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading-message span {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* Paywall */
+        .summary-card {
+            background: #181818;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #282828;
+        }
+        
+        .summary-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #282828;
+            font-size: 15px;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-item strong {
+            color: #1DB954;
+            font-weight: 700;
+        }
+        
+        .promo-badge {
+            background: #dc2626;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 16px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .price-container {
+            background: #0a0a0a;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+            border: 2px solid #1DB954;
+        }
+        
+        .old-price {
+            text-decoration: line-through;
+            color: #666;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .new-price {
+            font-size: 48px;
+            font-weight: 800;
+            color: #1DB954;
+            margin-bottom: 8px;
+        }
+        
+        .discount-badge {
+            background: #1DB954;
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 16px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+        
+        .timer {
+            font-size: 16px;
+            color: #dc2626;
+            font-weight: 700;
+            margin-top: 12px;
+        }
+        
+        .spots-left {
+            font-size: 14px;
+            color: #F5C518;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        
+        .guarantee {
+            text-align: center;
+            color: #b3b3b3;
+            font-size: 14px;
+            margin-top: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .trust-icons {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            color: #666;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+        
+        .cgu-text {
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+            margin-top: 16px;
+        }
+        
+        .success-check {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="container">
+        <div class="logo">
+            <span class="brav">Brav</span><span class="oo">oo</span>
+        </div>
+        
+        <!-- Step 1: Prénom -->
+        <div class="step active" id="step1">
+            <h1>Comment tu t'appelles ?</h1>
+            <div class="input-group">
+                <input type="text" id="nameInput" placeholder="Ton prénom">
+            </div>
+            <button class="btn" onclick="goToStep(2)">Continuer →</button>
+        </div>
+        
+        <!-- Step 2: Accueil personnalisé -->
+        <div class="step" id="step2">
+            <h1 class="shimmer">Salut <span id="nameDisplay"></span> ! 👋</h1>
+            <p>Je vais analyser ton profil et te créer un programme 100% personnalisé.</p>
+            <p>Tu es prêt(e) ?</p>
+            <button class="btn" onclick="goToStep(3)">C'est parti ! →</button>
+        </div>
+        
+        <!-- Step 3: Situation -->
+        <div class="step" id="step3">
+            <h2>Tu prépares quoi ?</h2>
+            <div class="cards-grid" id="situationCards">
+                <div class="card" onclick="selectCard(this, 'Le Brevet')">
+                    <div class="emoji">🎓</div>
+                    Le Brevet
+                </div>
+                <div class="card" onclick="selectCard(this, 'Le Bac')">
+                    <div class="emoji">📚</div>
+                    Le Bac
+                </div>
+                <div class="card" onclick="selectCard(this, 'Un BTS / DUT')">
+                    <div class="emoji">🎯</div>
+                    Un BTS / DUT
+                </div>
+                <div class="card" onclick="selectCard(this, 'Un concours')">
+                    <div class="emoji">📝</div>
+                    Un concours
+                </div>
+                <div class="card" onclick="selectCard(this, 'Le code de la route')">
+                    <div class="emoji">🚗</div>
+                    Le code
+                </div>
+                <div class="card" onclick="selectCard(this, 'Une langue')">
+                    <div class="emoji">🌍</div>
+                    Une langue
+                </div>
+                <div class="card" onclick="selectCard(this, 'Orthographe / Voltaire')">
+                    <div class="emoji">✏️</div>
+                    Orthographe
+                </div>
+                <div class="card" onclick="selectCard(this, 'Autre chose')">
+                    <div class="emoji">➕</div>
+                    Autre chose
+                </div>
+            </div>
+            <button class="btn" id="step3Btn" disabled onclick="goToStep(4)">Continuer →</button>
+        </div>
+        
+        <!-- Step 4: Niveau -->
+        <div class="step" id="step4">
+            <h2>Comment tu te situes en <span id="subjectDisplay"></span> ?</h2>
+            <div class="options-list">
+                <div class="option" onclick="selectOption(this, 'Débutant')">
+                    😰 J'ai du mal, j'ai besoin d'aide
+                </div>
+                <div class="option" onclick="selectOption(this, 'Intermédiaire')">
+                    😐 Ça va mais je veux m'améliorer
+                </div>
+                <div class="option" onclick="selectOption(this, 'Avancé')">
+                    💪 Je suis bon(ne) mais je vise l'excellence
+                </div>
+            </div>
+            <button class="btn" id="step4Btn" disabled onclick="goToStep(5)">Continuer →</button>
+        </div>
+        
+        <!-- Step 5: Objectif -->
+        <div class="step" id="step5">
+            <h2>Quel est ton objectif ?</h2>
+            <div class="options-list">
+                <div class="option" onclick="selectOption(this, 'Juste réussir')">
+                    Juste réussir (avoir la moyenne)
+                </div>
+                <div class="option" onclick="selectOption(this, 'Avoir une bonne note')">
+                    Avoir une bonne note (14+)
+                </div>
+                <div class="option" onclick="selectOption(this, 'Décrocher une mention')">
+                    Décrocher une mention
+                </div>
+                <div class="option" onclick="selectOption(this, 'Être le/la meilleur(e)')">
+                    Être le/la meilleur(e)
+                </div>
+            </div>
+            <button class="btn" id="step5Btn" disabled onclick="goToStep(6)">Continuer →</button>
+        </div>
+        
+        <!-- Step 6: Email + Password -->
+        <div class="step" id="step6">
+            <h2>Parfait <span id="nameDisplay2"></span> ! Crée ton compte pour sauvegarder ton programme.</h2>
+            <div class="input-group">
+                <input type="email" id="emailInput" placeholder="ton@email.com">
+            </div>
+            <div class="input-group">
+                <input type="password" id="passwordInput" placeholder="Crée un mot de passe">
+            </div>
+            <div class="cgu-text">En créant ton compte, tu acceptes les CGU</div>
+            <button class="btn" onclick="goToStep(7)">Créer mon compte →</button>
+        </div>
+        
+        <!-- Step 7: Loading -->
+        <div class="step" id="step7">
+            <div class="loading-container">
+                <div class="progress-circle">
+                    <svg width="200" height="200">
+                        <circle class="progress-bg" cx="100" cy="100" r="90"></circle>
+                        <circle class="progress-bar-circle" id="progressCircle" cx="100" cy="100" r="90" 
+                                stroke-dasharray="565.48" stroke-dashoffset="565.48"></circle>
+                    </svg>
+                    <div class="progress-text" id="progressPercent">0%</div>
+                </div>
+                <div class="loading-message" id="loadingMessage">
+                    <span>Analyse de ton profil...</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 8: Paywall -->
+        <div class="step" id="step8">
+            <h1>🎉 <span id="nameDisplay3"></span>, ton programme est prêt !</h1>
+            
+            <div class="summary-card">
+                <div class="summary-item">Tu prépares : <strong id="summaryGoal"></strong></div>
+                <div class="summary-item">Niveau : <strong id="summaryLevel"></strong></div>
+                <div class="summary-item">Objectif : <strong id="summaryObjective"></strong></div>
+                <div class="summary-item">Programme : <strong>12 semaines personnalisées</strong></div>
+                <div class="summary-item"><strong>287 exercices</strong> adaptés à ton profil</div>
+                <div class="summary-item"><strong>Coaching IA illimité</strong></div>
+            </div>
+            
+            <div class="promo-badge">🔥 OFFRE LIMITÉE</div>
+            
+            <div class="price-container">
+                <div class="spots-left">Il reste <strong id="spotsLeft"></strong> places</div>
+                <div class="old-price">12,99€/semaine</div>
+                <div class="discount-badge">-70%</div>
+                <div class="new-price">3,99€/semaine</div>
+                <div class="timer">⏱️ Offre expire dans <span id="countdown"></span></div>
+            </div>
+            
+            <button class="btn" onclick="handlePayment()">Accéder à mon programme →</button>
+            
+            <div class="guarantee">✅ Garantie satisfait ou remboursé 30 jours</div>
+            <div class="trust-icons">
+                <span>🔒 Paiement sécurisé</span>
+                <span>🔄 Sans engagement</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // User data storage
+        const userData = {
+            name: '',
+            situation: '',
+            level: '',
+            objective: '',
+            email: '',
+            password: ''
+        };
+        
+        let currentStep = 1;
+        
+        // Update progress bar
+        function updateProgress() {
+            const progress = (currentStep / 8) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+        
+        // Navigate to step
+        function goToStep(stepNumber) {
+            // Validate current step
+            if (!validateStep(currentStep)) {
+                return;
+            }
+            
+            // Save data from current step
+            saveStepData(currentStep);
+            
+            // Animate transition
+            const currentStepEl = document.getElementById('step' + currentStep);
+            const nextStepEl = document.getElementById('step' + stepNumber);
+            
+            currentStepEl.classList.add('slide-out');
+            
+            setTimeout(() => {
+                currentStepEl.classList.remove('active', 'slide-out');
+                nextStepEl.classList.add('active');
+                currentStep = stepNumber;
+                updateProgress();
+                
+                // Special handling for certain steps
+                if (stepNumber === 4) {
+                    document.getElementById('subjectDisplay').textContent = userData.situation.toLowerCase();
+                }
+                if (stepNumber === 7) {
+                    startLoading();
+                }
+                if (stepNumber === 8) {
+                    initPaywall();
+                }
+                
+                window.scrollTo(0, 0);
+            }, 400);
+        }
+        
+        // Validate step
+        function validateStep(step) {
+            if (step === 1) {
+                const name = document.getElementById('nameInput').value.trim();
+                if (!name) {
+                    alert('Entre ton prénom pour continuer');
+                    return false;
+                }
+            }
+            if (step === 6) {
+                const email = document.getElementById('emailInput').value.trim();
+                const password = document.getElementById('passwordInput').value;
+                if (!email || !password) {
+                    alert('Remplis tous les champs');
+                    return false;
+                }
+                if (!email.includes('@')) {
+                    alert('Entre une adresse email valide');
+                    return false;
+                }
+                if (password.length < 6) {
+                    alert('Le mot de passe doit faire au moins 6 caractères');
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // Save step data
+        function saveStepData(step) {
+            if (step === 1) {
+                userData.name = document.getElementById('nameInput').value.trim();
+                document.getElementById('nameDisplay').textContent = userData.name;
+                document.getElementById('nameDisplay2').textContent = userData.name;
+                document.getElementById('nameDisplay3').textContent = userData.name;
+            }
+            if (step === 6) {
+                userData.email = document.getElementById('emailInput').value.trim();
+                userData.password = document.getElementById('passwordInput').value;
+            }
+        }
+        
+        // Select card (Step 3)
+        function selectCard(element, value) {
+            const cards = document.querySelectorAll('#situationCards .card');
+            cards.forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+            userData.situation = value;
+            document.getElementById('step3Btn').disabled = false;
+        }
+        
+        // Select option (Steps 4 & 5)
+        function selectOption(element, value) {
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            const step = currentStep;
+            if (step === 4) {
+                userData.level = value;
+                document.getElementById('step4Btn').disabled = false;
+            } else if (step === 5) {
+                userData.objective = value;
+                document.getElementById('step5Btn').disabled = false;
+            }
+        }
+        
+        // Loading animation (Step 7)
+        function startLoading() {
+            const messages = [
+                { text: 'Analyse de ton profil...', progress: 0, duration: 1000 },
+                { text: 'Identification de tes points faibles...', progress: 25, duration: 1250 },
+                { text: 'Création de ton programme personnalisé...', progress: 50, duration: 1250 },
+                { text: 'Finalisation de ton espace...', progress: 75, duration: 1250 },
+                { text: '✅ Ton espace est prêt !', progress: 100, duration: 1000 }
+            ];
+            
+            let currentMessage = 0;
+            const circumference = 565.48;
+            
+            function updateLoading() {
+                if (currentMessage >= messages.length) {
+                    setTimeout(() => goToStep(8), 1000);
+                    return;
+                }
+                
+                const msg = messages[currentMessage];
+                const messageEl = document.getElementById('loadingMessage');
+                const percentEl = document.getElementById('progressPercent');
+                const circleEl = document.getElementById('progressCircle');
+                
+                // Fade out
+                messageEl.style.opacity = 0;
+                
+                setTimeout(() => {
+                    messageEl.innerHTML = '<span>' + msg.text + '</span>';
+                    percentEl.textContent = msg.progress + '%';
+                    
+                    const offset = circumference - (msg.progress / 100) * circumference;
+                    circleEl.style.strokeDashoffset = offset;
+                    
+                    // Fade in
+                    messageEl.style.opacity = 1;
+                }, 300);
+                
+                currentMessage++;
+                setTimeout(updateLoading, msg.duration);
+            }
+            
+            messageEl.style.transition = 'opacity 0.3s';
+            updateLoading();
+        }
+        
+        // Initialize paywall (Step 8)
+        function initPaywall() {
+            document.getElementById('summaryGoal').textContent = userData.situation;
+            document.getElementById('summaryLevel').textContent = userData.level;
+            document.getElementById('summaryObjective').textContent = userData.objective;
+            
+            // Initialize or get spots left
+            if (!localStorage.getItem('spotsLeft')) {
+                const randomSpots = Math.floor(Math.random() * 17) + 7; // 7-23
+                localStorage.setItem('spotsLeft', randomSpots);
+            }
+            document.getElementById('spotsLeft').textContent = localStorage.getItem('spotsLeft');
+            
+            // Initialize or get timer end date
+            if (!localStorage.getItem('promoEndTime')) {
+                const endTime = new Date().getTime() + (72 * 60 * 60 * 1000); // 72h from now
+                localStorage.setItem('promoEndTime', endTime);
+            }
+            
+            startCountdown();
+        }
+        
+        // Countdown timer
+        function startCountdown() {
+            function updateCountdown() {
+                const endTime = parseInt(localStorage.getItem('promoEndTime'));
+                const now = new Date().getTime();
+                const distance = endTime - now;
+                
+                if (distance < 0) {
+                    // Reset timer to 72h
+                    const newEndTime = new Date().getTime() + (72 * 60 * 60 * 1000);
+                    localStorage.setItem('promoEndTime', newEndTime);
+                    updateCountdown();
+                    return;
+                }
+                
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                document.getElementById('countdown').textContent = 
+                    String(hours).padStart(2, '0') + ':' +
+                    String(minutes).padStart(2, '0') + ':' +
+                    String(seconds).padStart(2, '0');
+            }
+            
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+        
+        // Handle payment
+        function handlePayment() {
+            alert('Paiement en cours de configuration');
+        }
+        
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>
