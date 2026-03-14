@@ -329,6 +329,39 @@
       pointer-events: none;
     }
 
+    /* Search input */
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      border-radius: 12px;
+      border: 2px solid var(--border-subtle);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: var(--bg-page);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(29, 185, 84, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      pointer-events: none;
+    }
+
     /* ========================================
        BUTTON
        ======================================== */
@@ -411,6 +444,14 @@
     .chip:nth-child(10) { animation-delay: 0.45s; }
     .chip:nth-child(11) { animation-delay: 0.5s; }
     .chip:nth-child(12) { animation-delay: 0.55s; }
+    .chip:nth-child(13) { animation-delay: 0.6s; }
+    .chip:nth-child(14) { animation-delay: 0.65s; }
+    .chip:nth-child(15) { animation-delay: 0.7s; }
+    .chip:nth-child(16) { animation-delay: 0.75s; }
+    .chip:nth-child(17) { animation-delay: 0.8s; }
+    .chip:nth-child(18) { animation-delay: 0.85s; }
+    .chip:nth-child(19) { animation-delay: 0.9s; }
+    .chip:nth-child(20) { animation-delay: 0.95s; }
 
     @keyframes bounceIn {
       to {
@@ -439,6 +480,10 @@
       margin-left: auto;
       color: var(--primary);
       font-weight: 900;
+    }
+
+    .chip.hidden {
+      display: none;
     }
 
     /* ========================================
@@ -626,12 +671,14 @@
 
     .quiz-explanation.correct {
       background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.3); color: #FFFFFF;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #FFFFFF;
     }
 
     .quiz-explanation.wrong {
       background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3); color: #FFFFFF;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #FFFFFF;
     }
 
     .quiz-progress {
@@ -970,8 +1017,6 @@
       border-radius: 999px;
     }
 
-
-
     .paywall-cta {
       width: 100%;
       padding: 18px 32px;
@@ -1308,56 +1353,171 @@
 
   <script>
     // ========================================
-    // STATE
+    // DATA & CONFIG
     // ========================================
-    const STEPS = [
-      'prenom',
-      'classe',
-      'moyenne',
-      'matieres_fortes',
-      'matieres_faibles',
-      'objectif',
-      'loading_quiz',
-      'quiz',
-      'recap_app',
-      'email',
-      'password',
-      'loading_profile',
-      'paywall'
+    
+    const PREPARATIONS = [
+      { value: 'brevet', label: 'Le Brevet (collège)', emoji: '🎓' },
+      { value: 'bac', label: 'Le Bac', emoji: '📚' },
+      { value: 'bts', label: 'Un BTS', emoji: '🎯' },
+      { value: 'but', label: 'Un BUT', emoji: '🏫' },
+      { value: 'concours', label: 'Un concours', emoji: '📝' },
+      { value: 'code', label: 'Le Code de la route', emoji: '🚗' },
+      { value: 'langue', label: 'Une langue (TOEIC, DELF...)', emoji: '🌍' },
+      { value: 'orthographe', label: 'Orthographe / Voltaire', emoji: '✏️' },
+      { value: 'primaire', label: 'Primaire (CM1-CM2)', emoji: '📖' },
+      { value: 'autre', label: 'Autre chose', emoji: '➕' }
     ];
 
-    const CLASSES = [
-      { label: 'Primaire', value: 'primaire', emoji: '🎒' },
-      { label: '6ème', value: '6eme', emoji: '📚' },
-      { label: '5ème', value: '5eme', emoji: '📚' },
-      { label: '4ème', value: '4eme', emoji: '📚' },
-      { label: '3ème', value: '3eme', emoji: '📚' },
-      { label: '2nde', value: '2nde', emoji: '🎓' },
-      { label: '1ère', value: '1ere', emoji: '🎓' },
-      { label: 'Terminale', value: 'terminale', emoji: '🎓' },
-      { label: 'BTS', value: 'bts', emoji: '💼' },
-      { label: 'Prépa concours', value: 'prepa', emoji: '🏆' },
-      { label: 'Code de la route', value: 'code', emoji: '🚗' },
-      { label: 'Langues', value: 'langues', emoji: '🌍' },
-      { label: 'Orthographe', value: 'orthographe', emoji: '✍️' }
+    const BTS_LIST = [
+      'BTS Commerce International', 'BTS Comptabilité Gestion', 'BTS Communication',
+      'BTS NDRC (Négociation et Digitalisation de la Relation Client)',
+      'BTS MCO (Management Commercial Opérationnel)',
+      'BTS SAM (Support à l\'Action Managériale)',
+      'BTS SIO (Services Informatiques aux Organisations)',
+      'BTS Tourisme', 'BTS Banque', 'BTS Assurance', 'BTS Diététique',
+      'BTS ESF (Économie Sociale Familiale)', 'BTS SP3S',
+      'BTS Électrotechnique', 'BTS CRSA', 'BTS Bâtiment', 'BTS Agroalimentaire'
     ];
 
-    const SUBJECTS = [
-      { key: 'mathematiques', label: 'Mathématiques', emoji: '📐' },
-      { key: 'francais', label: 'Français', emoji: '📖' },
-      { key: 'histoire_geo', label: 'Histoire-Géo', emoji: '🌍' },
-      { key: 'sciences', label: 'Sciences', emoji: '🔬' },
-      { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' },
-      { key: 'espagnol', label: 'Espagnol', emoji: '🇪🇸' },
-      { key: 'physique', label: 'Physique', emoji: '⚛️' },
-      { key: 'svt', label: 'SVT', emoji: '🧬' },
-      { key: 'philo', label: 'Philosophie', emoji: '🤔' },
-      { key: 'eco', label: 'Économie', emoji: '💰' },
-      { key: 'arts', label: 'Arts', emoji: '🎨' },
-      { key: 'musique', label: 'Musique', emoji: '🎵' },
-      { key: 'eps', label: 'EPS', emoji: '🏃' }
+    const BUT_LIST = [
+      'BUT Informatique', 'BUT GEA (Gestion des Entreprises et des Administrations)',
+      'BUT TC (Techniques de Commercialisation)',
+      'BUT MMI (Métiers du Multimédia et de l\'Internet)',
+      'BUT Génie Civil', 'BUT Génie Mécanique', 'BUT Génie Électrique',
+      'BUT Chimie', 'BUT Biologie', 'BUT GACO', 'BUT Carrières Juridiques',
+      'BUT Carrières Sociales'
     ];
 
+    const CONCOURS_LIST = [
+      'CRPE (professeur des écoles)', 'Infirmier (IFSI)', 'Police', 'Gendarmerie',
+      'Douanes', 'Auxiliaire de puériculture', 'Aide-soignant'
+    ];
+
+    const LANGUES_LIST = [
+      'TOEIC', 'TOEFL', 'DELF/DALF', 'Anglais général', 'Espagnol', 'Allemand',
+      'Italien', 'Portugais', 'Chinois', 'Japonais', 'Arabe'
+    ];
+
+    const PERMIS_LIST = [
+      'Permis B (voiture)', 'Permis A/A2 (moto)', 'Permis Bateau', 'Permis AM (scooter)'
+    ];
+
+    // Matières par préparation
+    const MATIERES_CONFIG = {
+      brevet: [
+        { key: 'mathematiques', label: 'Mathématiques', emoji: '📐' },
+        { key: 'francais', label: 'Français', emoji: '📖' },
+        { key: 'histoire_geo_emc', label: 'Histoire-Géo/EMC', emoji: '🌍' },
+        { key: 'sciences', label: 'Sciences (SVT+Physique+Techno)', emoji: '🔬' },
+        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' },
+        { key: 'espagnol', label: 'Espagnol/Allemand', emoji: '🇪🇸' },
+        { key: 'arts', label: 'Arts plastiques', emoji: '🎨' },
+        { key: 'musique', label: 'Éducation musicale', emoji: '🎵' },
+        { key: 'eps', label: 'EPS', emoji: '🏃' }
+      ],
+      bac: [
+        { key: 'mathematiques', label: 'Mathématiques', emoji: '📐' },
+        { key: 'physique_chimie', label: 'Physique-Chimie', emoji: '⚛️' },
+        { key: 'svt', label: 'SVT', emoji: '🧬' },
+        { key: 'ses', label: 'SES', emoji: '💰' },
+        { key: 'hggsp', label: 'HGGSP', emoji: '🌍' },
+        { key: 'hlp', label: 'HLP', emoji: '📚' },
+        { key: 'llce_anglais', label: 'LLCE Anglais', emoji: '🇬🇧' },
+        { key: 'llce_espagnol', label: 'LLCE Espagnol', emoji: '🇪🇸' },
+        { key: 'nsi', label: 'NSI', emoji: '💻' },
+        { key: 'si', label: 'SI', emoji: '🔧' },
+        { key: 'arts', label: 'Arts', emoji: '🎨' },
+        { key: 'musique', label: 'Musique', emoji: '🎵' },
+        { key: 'francais', label: 'Français (1ère)', emoji: '📖' },
+        { key: 'philo', label: 'Philosophie (Term)', emoji: '🤔' },
+        { key: 'histoire_geo', label: 'Histoire-Géo', emoji: '🗺️' },
+        { key: 'anglais', label: 'LVA Anglais', emoji: '🇬🇧' },
+        { key: 'lvb', label: 'LVB', emoji: '🌍' },
+        { key: 'ens_scientifique', label: 'Enseignement scientifique', emoji: '🔬' },
+        { key: 'emc', label: 'EMC', emoji: '🗳️' },
+        { key: 'eps', label: 'EPS', emoji: '🏃' }
+      ],
+      bts_mco: [
+        { key: 'culture_generale', label: 'Culture générale', emoji: '📚' },
+        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' },
+        { key: 'cejm', label: 'Culture éco/juridique/managériale', emoji: '💼' },
+        { key: 'dev_relation_client', label: 'Développement de la relation client', emoji: '👥' },
+        { key: 'animation_offre', label: 'Animation et dynamisation de l\'offre commerciale', emoji: '📊' },
+        { key: 'gestion_operationnelle', label: 'Gestion opérationnelle', emoji: '⚙️' },
+        { key: 'management_equipe', label: 'Management de l\'équipe commerciale', emoji: '👔' }
+      ],
+      bts_sio: [
+        { key: 'culture_generale', label: 'Culture générale', emoji: '📚' },
+        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' },
+        { key: 'mathematiques', label: 'Maths', emoji: '📐' },
+        { key: 'algorithme', label: 'Algorithme appliqué', emoji: '💻' },
+        { key: 'si', label: 'SI (support système/réseau OU solutions logicielles)', emoji: '🖥️' },
+        { key: 'cybersecurite', label: 'Cybersécurité', emoji: '🔒' }
+      ],
+      bts_ndrc: [
+        { key: 'culture_generale', label: 'Culture générale', emoji: '📚' },
+        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' },
+        { key: 'cejm', label: 'Culture éco/juridique/managériale', emoji: '💼' },
+        { key: 'relation_client_distance', label: 'Relation client à distance', emoji: '📞' },
+        { key: 'digitalisation', label: 'Digitalisation', emoji: '💻' },
+        { key: 'animation_reseau', label: 'Animation réseau', emoji: '🌐' }
+      ],
+      bts_generic: [
+        { key: 'culture_generale', label: 'Culture générale', emoji: '📚' },
+        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' },
+        { key: 'matiere_pro1', label: 'Matière pro 1', emoji: '📋' },
+        { key: 'matiere_pro2', label: 'Matière pro 2', emoji: '📋' },
+        { key: 'matiere_pro3', label: 'Matière pro 3', emoji: '📋' }
+      ],
+      but_generic: [
+        { key: 'culture_generale', label: 'Culture générale', emoji: '📚' },
+        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' },
+        { key: 'matiere_specifique1', label: 'Matière spécifique 1', emoji: '📋' },
+        { key: 'matiere_specifique2', label: 'Matière spécifique 2', emoji: '📋' },
+        { key: 'matiere_specifique3', label: 'Matière spécifique 3', emoji: '📋' }
+      ],
+      code: [
+        { key: 'code_route', label: 'Code de la route', emoji: '🚦' },
+        { key: 'signalisation', label: 'Signalisation', emoji: '🚸' },
+        { key: 'priorites', label: 'Règles de priorité', emoji: '⚠️' },
+        { key: 'agglomeration', label: 'Conduite en agglomération', emoji: '🏙️' },
+        { key: 'autoroute', label: 'Autoroute', emoji: '🛣️' },
+        { key: 'premiers_secours', label: 'Premiers secours', emoji: '🚑' },
+        { key: 'eco_conduite', label: 'Éco-conduite', emoji: '🍃' }
+      ],
+      langue: [
+        { key: 'grammaire', label: 'Grammaire', emoji: '📖' },
+        { key: 'vocabulaire', label: 'Vocabulaire', emoji: '📚' },
+        { key: 'comprehension_ecrite', label: 'Compréhension écrite', emoji: '📄' },
+        { key: 'comprehension_orale', label: 'Compréhension orale', emoji: '🎧' },
+        { key: 'expression_ecrite', label: 'Expression écrite', emoji: '✍️' },
+        { key: 'expression_orale', label: 'Expression orale', emoji: '🗣️' }
+      ],
+      orthographe: [
+        { key: 'orthographe', label: 'Orthographe', emoji: '✏️' },
+        { key: 'grammaire', label: 'Grammaire', emoji: '📖' },
+        { key: 'conjugaison', label: 'Conjugaison', emoji: '🔄' },
+        { key: 'vocabulaire', label: 'Vocabulaire', emoji: '📚' },
+        { key: 'syntaxe', label: 'Syntaxe', emoji: '🔗' },
+        { key: 'expression_ecrite', label: 'Expression écrite', emoji: '✍️' }
+      ],
+      primaire: [
+        { key: 'francais', label: 'Français (lecture, écriture, grammaire)', emoji: '📖' },
+        { key: 'mathematiques', label: 'Mathématiques', emoji: '🔢' },
+        { key: 'sciences', label: 'Sciences', emoji: '🔬' },
+        { key: 'histoire_geo', label: 'Histoire-Géo', emoji: '🌍' },
+        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' }
+      ],
+      concours_generic: [
+        { key: 'culture_generale', label: 'Culture générale', emoji: '📚' },
+        { key: 'francais', label: 'Français', emoji: '📖' },
+        { key: 'mathematiques', label: 'Mathématiques', emoji: '📐' },
+        { key: 'connaissances_specifiques', label: 'Connaissances spécifiques', emoji: '📋' }
+      ]
+    };
+
+    // Questions quiz adaptées
     const ALL_QUIZ_QUESTIONS = {
       primaire: [
         {
@@ -1449,22 +1609,6 @@
           choices: ['J\'ai', 'J\'avais', 'J\'eus', 'J\'aurai'],
           correctAnswerIndex: 1,
           explanation: 'À l\'imparfait, "avoir" à la 1ère personne du singulier = j\'avais.'
-        },
-        {
-          id: 'c7',
-          subject: 'Anglais',
-          prompt: 'Comment dit-on "Je suis étudiant" en anglais ?',
-          choices: ['I am student', 'I is a student', 'I am a student', 'I are student'],
-          correctAnswerIndex: 2,
-          explanation: '"I am a student" : on utilise l\'article "a" devant "student".'
-        },
-        {
-          id: 'c8',
-          subject: 'Mathématiques',
-          prompt: 'Résous : 2x + 5 = 15',
-          choices: ['x = 5', 'x = 10', 'x = 7.5', 'x = 20'],
-          correctAnswerIndex: 0,
-          explanation: '2x + 5 = 15 → 2x = 10 → x = 5.'
         }
       ],
       lycee: [
@@ -1502,14 +1646,6 @@
         },
         {
           id: 'l5',
-          subject: 'Mathématiques',
-          prompt: 'Combien vaut cos(0) ?',
-          choices: ['0', '1', '-1', '0.5'],
-          correctAnswerIndex: 1,
-          explanation: 'cos(0) = 1 (valeur remarquable du cercle trigonométrique).'
-        },
-        {
-          id: 'l6',
           subject: 'Histoire',
           prompt: 'En quelle année a débuté la Première Guerre mondiale ?',
           choices: ['1914', '1918', '1939', '1945'],
@@ -1517,20 +1653,12 @@
           explanation: 'La Première Guerre mondiale a débuté en 1914 et s\'est terminée en 1918.'
         },
         {
-          id: 'l7',
+          id: 'l6',
           subject: 'SVT',
           prompt: 'Combien de chromosomes possède une cellule humaine normale ?',
           choices: ['23', '46', '48', '92'],
           correctAnswerIndex: 1,
           explanation: 'Une cellule humaine normale possède 46 chromosomes (23 paires).'
-        },
-        {
-          id: 'l8',
-          subject: 'Anglais',
-          prompt: 'Comment dit-on "Je l\'ai déjà vu" en anglais ?',
-          choices: ['I already see him', 'I have already seen him', 'I already saw him', 'I did already see him'],
-          correctAnswerIndex: 1,
-          explanation: 'On utilise le present perfect : "I have already seen him".'
         }
       ],
       superieur: [
@@ -1560,56 +1688,158 @@
         },
         {
           id: 's4',
-          subject: 'Droit',
-          prompt: 'Quelle est la durée maximale du CDI en France ?',
-          choices: ['2 ans', '5 ans', 'Indéterminée', '10 ans'],
-          correctAnswerIndex: 2,
-          explanation: 'Le CDI (Contrat à Durée Indéterminée) n\'a pas de durée maximale.'
-        },
-        {
-          id: 's5',
           subject: 'Physique',
           prompt: 'Quelle est la vitesse de la lumière dans le vide ?',
           choices: ['300 000 km/s', '3 000 km/s', '30 000 km/s', '300 km/s'],
           correctAnswerIndex: 0,
           explanation: 'La vitesse de la lumière dans le vide est d\'environ 300 000 km/s (299 792 458 m/s exactement).'
         }
+      ],
+      code: [
+        {
+          id: 'code1',
+          subject: 'Code de la route',
+          prompt: 'À combien de km/h est limitée la vitesse en agglomération ?',
+          choices: ['30 km/h', '50 km/h', '70 km/h', '90 km/h'],
+          correctAnswerIndex: 1,
+          explanation: 'En agglomération, la vitesse est limitée à 50 km/h (sauf indication contraire).'
+        },
+        {
+          id: 'code2',
+          subject: 'Signalisation',
+          prompt: 'Que signifie un panneau triangulaire rouge avec un point d\'exclamation ?',
+          choices: ['Danger', 'Interdiction', 'Obligation', 'Indication'],
+          correctAnswerIndex: 0,
+          explanation: 'Un panneau triangulaire rouge indique un danger. Le point d\'exclamation signale un danger non spécifié.'
+        },
+        {
+          id: 'code3',
+          subject: 'Priorités',
+          prompt: 'Qui a la priorité à un carrefour sans signalisation ?',
+          choices: ['Le véhicule venant de gauche', 'Le véhicule venant de droite', 'Le plus rapide', 'Le plus gros véhicule'],
+          correctAnswerIndex: 1,
+          explanation: 'En l\'absence de signalisation, c\'est la priorité à droite qui s\'applique.'
+        },
+        {
+          id: 'code4',
+          subject: 'Autoroute',
+          prompt: 'Quelle est la vitesse maximale autorisée sur autoroute par temps sec ?',
+          choices: ['110 km/h', '120 km/h', '130 km/h', '140 km/h'],
+          correctAnswerIndex: 2,
+          explanation: 'Sur autoroute par temps sec, la vitesse maximale est de 130 km/h.'
+        },
+        {
+          id: 'code5',
+          subject: 'Premiers secours',
+          prompt: 'Quel numéro appeler en cas d\'urgence en France ?',
+          choices: ['15', '17', '18', 'Tous ces numéros'],
+          correctAnswerIndex: 3,
+          explanation: '15 (SAMU), 17 (Police), 18 (Pompiers) sont tous des numéros d\'urgence valables. Le 112 fonctionne aussi.'
+        }
+      ],
+      langue: [
+        {
+          id: 'lang1',
+          subject: 'Grammaire',
+          prompt: 'Comment conjugue-t-on "I" (je) avec le verbe "to be" au présent en anglais ?',
+          choices: ['I is', 'I am', 'I are', 'I be'],
+          correctAnswerIndex: 1,
+          explanation: 'Le verbe "to be" à la première personne du singulier au présent : "I am".'
+        },
+        {
+          id: 'lang2',
+          subject: 'Vocabulaire',
+          prompt: 'Que signifie "breakfast" en anglais ?',
+          choices: ['Déjeuner', 'Dîner', 'Petit-déjeuner', 'Goûter'],
+          correctAnswerIndex: 2,
+          explanation: '"Breakfast" signifie "petit-déjeuner" (littéralement "casser le jeûne").'
+        },
+        {
+          id: 'lang3',
+          subject: 'Compréhension',
+          prompt: '"She goes to school every day." Quelle est la fréquence ?',
+          choices: ['Jamais', 'Parfois', 'Tous les jours', 'Une fois par semaine'],
+          correctAnswerIndex: 2,
+          explanation: '"Every day" signifie "tous les jours".'
+        },
+        {
+          id: 'lang4',
+          subject: 'Grammaire',
+          prompt: 'Quel est le pluriel de "child" en anglais ?',
+          choices: ['childs', 'childes', 'children', 'childs'],
+          correctAnswerIndex: 2,
+          explanation: 'Le pluriel irrégulier de "child" est "children".'
+        }
       ]
     };
 
-    function getQuizQuestions() {
-      const classe = state.classe;
-      let pool = [];
-
-      if (classe === 'primaire') {
-        pool = ALL_QUIZ_QUESTIONS.primaire;
-      } else if (['6eme', '5eme', '4eme', '3eme'].includes(classe)) {
-        pool = ALL_QUIZ_QUESTIONS.college;
-      } else if (['2nde', '1ere', 'terminale'].includes(classe)) {
-        pool = ALL_QUIZ_QUESTIONS.lycee;
-      } else {
-        pool = ALL_QUIZ_QUESTIONS.superieur;
-      }
-
-      // Sélectionner 6-8 questions aléatoires
-      const count = Math.floor(Math.random() * 3) + 6; // 6, 7 ou 8
-      const shuffled = pool.sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, Math.min(count, pool.length));
-    }
-
-    let currentStepIndex = 0;
+    // ========================================
+    // STATE
+    // ========================================
     let state = {
       prenom: '',
-      classe: '',
-      moyenne: null,
+      preparation: '',        // 'brevet', 'bac', 'bts', 'but', 'concours', 'code', 'langue', 'orthographe', 'primaire', 'autre'
+      sousChoix: '',          // classe, filière, BTS spécifique, etc.
+      sousChoix2: '',         // ex: spécialités bac
+      autreTexte: '',         // si "autre" est sélectionné
+      matieres: [],           // liste des matières adaptées au parcours
       matieresFortes: [],
       matieresFaibles: [],
+      moyenne: null,
       objectif: null,
       quizQuestions: [],
       quizAnswers: {},
       email: '',
       password: ''
     };
+
+    let currentStepIndex = 0;
+    let dynamicSteps = [];
+
+    // ========================================
+    // DYNAMIC STEPS GENERATION
+    // ========================================
+    function generateSteps() {
+      const base = ['prenom', 'preparation'];
+      const steps = [...base];
+
+      // Ajouter des étapes adaptatives selon la préparation
+      if (state.preparation === 'brevet') {
+        steps.push('brevet_classe');
+      } else if (state.preparation === 'bac') {
+        steps.push('bac_filiere', 'bac_classe');
+      } else if (state.preparation === 'bts') {
+        steps.push('bts_choix');
+      } else if (state.preparation === 'but') {
+        steps.push('but_choix');
+      } else if (state.preparation === 'concours') {
+        steps.push('concours_choix');
+      } else if (state.preparation === 'code') {
+        steps.push('code_permis');
+      } else if (state.preparation === 'langue') {
+        steps.push('langue_choix');
+      } else if (state.preparation === 'primaire') {
+        steps.push('primaire_classe');
+      } else if (state.preparation === 'autre') {
+        steps.push('autre_texte');
+      }
+
+      // Ajouter les étapes communes (sauf pour orthographe et autre qui skip certaines)
+      if (!['orthographe', 'autre'].includes(state.preparation)) {
+        steps.push('moyenne');
+      }
+      
+      steps.push('matieres_fortes', 'matieres_faibles');
+      
+      if (!['orthographe', 'autre'].includes(state.preparation)) {
+        steps.push('objectif');
+      }
+      
+      steps.push('loading_quiz', 'quiz', 'recap_app', 'email', 'password', 'loading_profile', 'paywall');
+
+      dynamicSteps = steps;
+      return steps;
+    }
 
     // ========================================
     // NAVIGATION
@@ -1629,402 +1859,799 @@
     }
 
     function goNext() {
-      if (currentStepIndex < STEPS.length - 1) {
+      // Générer les matières adaptées si on quitte une étape de configuration
+      const currentStep = dynamicSteps[currentStepIndex];
+      if (['preparation', 'brevet_classe', 'bac_filiere', 'bts_choix', 'but_choix', 'concours_choix', 'code_permis', 'langue_choix', 'primaire_classe'].includes(currentStep)) {
+        generateAdaptiveMatieres();
+      }
+
+      if (currentStepIndex < dynamicSteps.length - 1) {
         goToStep(currentStepIndex + 1);
       }
     }
 
     function updateProgress() {
-      const percent = ((currentStepIndex + 1) / STEPS.length) * 100;
+      const percent = ((currentStepIndex + 1) / dynamicSteps.length) * 100;
       document.getElementById('progressBar').style.width = percent + '%';
     }
 
     // ========================================
-    // RENDER
+    // MATIÈRES ADAPTATIVES
+    // ========================================
+    function generateAdaptiveMatieres() {
+      const { preparation, sousChoix } = state;
+      
+      if (preparation === 'brevet') {
+        state.matieres = MATIERES_CONFIG.brevet;
+      } else if (preparation === 'bac') {
+        state.matieres = MATIERES_CONFIG.bac;
+      } else if (preparation === 'bts') {
+        if (sousChoix.includes('MCO')) {
+          state.matieres = MATIERES_CONFIG.bts_mco;
+        } else if (sousChoix.includes('SIO')) {
+          state.matieres = MATIERES_CONFIG.bts_sio;
+        } else if (sousChoix.includes('NDRC')) {
+          state.matieres = MATIERES_CONFIG.bts_ndrc;
+        } else {
+          state.matieres = MATIERES_CONFIG.bts_generic;
+        }
+      } else if (preparation === 'but') {
+        state.matieres = MATIERES_CONFIG.but_generic;
+      } else if (preparation === 'code') {
+        state.matieres = MATIERES_CONFIG.code;
+      } else if (preparation === 'langue') {
+        state.matieres = MATIERES_CONFIG.langue;
+      } else if (preparation === 'orthographe') {
+        state.matieres = MATIERES_CONFIG.orthographe;
+      } else if (preparation === 'primaire') {
+        state.matieres = MATIERES_CONFIG.primaire;
+      } else if (preparation === 'concours') {
+        state.matieres = MATIERES_CONFIG.concours_generic;
+      } else {
+        state.matieres = [];
+      }
+    }
+
+    // ========================================
+    // QUIZ QUESTIONS GENERATOR
+    // ========================================
+    function getQuizQuestions() {
+      const { preparation, sousChoix } = state;
+      let pool = [];
+
+      if (preparation === 'primaire') {
+        pool = ALL_QUIZ_QUESTIONS.primaire;
+      } else if (preparation === 'brevet') {
+        pool = ALL_QUIZ_QUESTIONS.college;
+      } else if (preparation === 'bac') {
+        pool = ALL_QUIZ_QUESTIONS.lycee;
+      } else if (['bts', 'but', 'concours'].includes(preparation)) {
+        pool = ALL_QUIZ_QUESTIONS.superieur;
+      } else if (preparation === 'code') {
+        pool = ALL_QUIZ_QUESTIONS.code;
+      } else if (preparation === 'langue') {
+        pool = ALL_QUIZ_QUESTIONS.langue;
+      } else {
+        // Orthographe, autre → mélange college/lycee
+        pool = [...ALL_QUIZ_QUESTIONS.college, ...ALL_QUIZ_QUESTIONS.lycee];
+      }
+
+      const count = Math.min(6, pool.length);
+      const shuffled = pool.sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, count);
+    }
+
+    // ========================================
+    // RENDER STEPS
     // ========================================
     function renderStep() {
-      const step = STEPS[currentStepIndex];
+      const step = dynamicSteps[currentStepIndex];
       const card = document.getElementById('card');
+      const stepNum = currentStepIndex + 1;
+      const totalSteps = dynamicSteps.length;
 
       switch (step) {
         case 'prenom':
-          card.innerHTML = `
-            <div class="card-content">
-              <div class="step-label">
-                <span>Étape 1/7</span>
-                <span class="step-progress-text">Étape 1 sur 7</span>
-              </div>
-              <h2 class="heading">Comment tu t'appelles ?</h2>
-              <input type="text" class="input" id="prenomInput" placeholder="Ton prénom" autofocus>
-            </div>
-            <div class="card-action">
-              <button class="btn" id="continueBtn" disabled>Continuer</button>
-            </div>
-          `;
-          const prenomInput = document.getElementById('prenomInput');
-          const continueBtn = document.getElementById('continueBtn');
-          prenomInput.value = state.prenom;
-          prenomInput.addEventListener('input', (e) => {
-            state.prenom = e.target.value.trim();
-            continueBtn.disabled = !state.prenom;
-          });
-          prenomInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && state.prenom) {
-              showConfetti();
-              goNext();
-            }
-          });
-          continueBtn.addEventListener('click', () => {
-            showConfetti();
-            goNext();
-          });
-          if (state.prenom) continueBtn.disabled = false;
+          renderPrenomStep();
           break;
-
-        case 'classe':
-          card.innerHTML = `
-            <div class="card-content">
-              <div class="step-label">
-                <span>Étape 2/7</span>
-                <span class="step-progress-text">Étape 2 sur 7</span>
-              </div>
-              <h2 class="heading">Salut ${state.prenom} ! Tu prépares quoi ?</h2>
-              <div class="chips-list" id="classeList"></div>
-            </div>
-          `;
-          const classeList = document.getElementById('classeList');
-          CLASSES.forEach(c => {
-            const chip = document.createElement('div');
-            chip.className = 'chip' + (state.classe === c.value ? ' selected' : '');
-            chip.innerHTML = `<span class="emoji">${c.emoji}</span><span>${c.label}</span>`;
-            chip.addEventListener('click', () => {
-              state.classe = c.value;
-              setTimeout(goNext, 300);
-            });
-            classeList.appendChild(chip);
-          });
+        case 'preparation':
+          renderPreparationStep();
           break;
-
+        case 'brevet_classe':
+          renderBrevetClasseStep();
+          break;
+        case 'bac_filiere':
+          renderBacFiliereStep();
+          break;
+        case 'bac_classe':
+          renderBacClasseStep();
+          break;
+        case 'bts_choix':
+          renderBTSChoixStep();
+          break;
+        case 'but_choix':
+          renderBUTChoixStep();
+          break;
+        case 'concours_choix':
+          renderConcoursChoixStep();
+          break;
+        case 'code_permis':
+          renderCodePermisStep();
+          break;
+        case 'langue_choix':
+          renderLangueChoixStep();
+          break;
+        case 'primaire_classe':
+          renderPrimaireClasseStep();
+          break;
+        case 'autre_texte':
+          renderAutreTexteStep();
+          break;
         case 'moyenne':
-          card.innerHTML = `
-            <div class="card-content">
-              <div class="step-label">
-                <span>Étape 3/7</span>
-                <span class="step-progress-text">Étape 3 sur 7</span>
-              </div>
-              <h2 class="heading">Quelle est ta moyenne générale à peu près ?</h2>
-              <p class="subtitle">Pas de jugement ! On est là pour t'aider, pas pour te noter 😊</p>
-              <div class="input-wrapper">
-                <input type="text" inputmode="decimal" class="input" id="moyenneInput" placeholder="Ex: 12.5" autofocus>
-                <span class="input-suffix">/ 20</span>
-              </div>
-            </div>
-            <div class="card-action">
-              <button class="btn" id="continueBtn" disabled>Continuer</button>
-            </div>
-          `;
-          const moyenneInput = document.getElementById('moyenneInput');
-          const continueMoyenneBtn = document.getElementById('continueBtn');
-          moyenneInput.addEventListener('input', (e) => {
-            const val = e.target.value.replace(',', '.');
-            const num = parseFloat(val);
-            if (!isNaN(num) && num >= 0 && num <= 20) {
-              state.moyenne = Math.round(num * 10) / 10;
-              continueMoyenneBtn.disabled = false;
-            } else {
-              state.moyenne = null;
-              continueMoyenneBtn.disabled = true;
-            }
-          });
-          moyenneInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && state.moyenne !== null) goNext();
-          });
-          continueMoyenneBtn.addEventListener('click', goNext);
+          renderMoyenneStep();
           break;
-
         case 'matieres_fortes':
-          card.innerHTML = `
-            <div class="card-content">
-              <div class="step-label">
-                <span>Étape 4/7</span>
-                <span class="step-progress-text">Étape 4 sur 7</span>
-              </div>
-              <h2 class="heading">Dans quelles matières tu te sens déjà à l'aise ?</h2>
-              <p class="subtitle">Tu peux en sélectionner aucune si tu le souhaites</p>
-              <div class="chips-list" id="matieresFortesList"></div>
-            </div>
-            <div class="card-action">
-              <button class="btn" id="continueBtn">Continuer</button>
-            </div>
-          `;
-          const matieresFortesList = document.getElementById('matieresFortesList');
-          SUBJECTS.forEach(s => {
-            const chip = document.createElement('div');
-            const selected = state.matieresFortes.includes(s.key);
-            chip.className = 'chip' + (selected ? ' selected' : '');
-            chip.innerHTML = `<span class="emoji">${s.emoji}</span><span>${s.label}</span>${selected ? '<span class="checkmark">✓</span>' : ''}`;
-            chip.addEventListener('click', () => {
-              if (state.matieresFortes.includes(s.key)) {
-                state.matieresFortes = state.matieresFortes.filter(k => k !== s.key);
-              } else {
-                state.matieresFortes.push(s.key);
-              }
-              renderStep();
-            });
-            matieresFortesList.appendChild(chip);
-          });
-          document.getElementById('continueBtn').addEventListener('click', goNext);
+          renderMatieresStep('fortes');
           break;
-
         case 'matieres_faibles':
-          const availableSubjects = SUBJECTS.filter(s => !state.matieresFortes.includes(s.key));
-          card.innerHTML = `
-            <div class="card-content">
-              <div class="step-label">
-                <span>Étape 5/7</span>
-                <span class="step-progress-text">Étape 5 sur 7</span>
-              </div>
-              <h2 class="heading">Et les matières où tu veux progresser ? 🚀</h2>
-              <p class="subtitle">C'est justement là qu'on va te faire décoller !</p>
-              <div class="chips-list" id="matieresFaiblesList"></div>
-            </div>
-            <div class="card-action">
-              <button class="btn" id="continueBtn" disabled>Continuer</button>
-            </div>
-          `;
-          const matieresFaiblesList = document.getElementById('matieresFaiblesList');
-          availableSubjects.forEach(s => {
-            const chip = document.createElement('div');
-            const selected = state.matieresFaibles.includes(s.key);
-            chip.className = 'chip' + (selected ? ' selected' : '');
-            chip.innerHTML = `<span class="emoji">${s.emoji}</span><span>${s.label}</span>${selected ? '<span class="checkmark">✓</span>' : ''}`;
-            chip.addEventListener('click', () => {
-              if (state.matieresFaibles.includes(s.key)) {
-                state.matieresFaibles = state.matieresFaibles.filter(k => k !== s.key);
-              } else {
-                state.matieresFaibles.push(s.key);
-              }
-              renderStep();
-            });
-            matieresFaiblesList.appendChild(chip);
-          });
-          const continueFaiblesBtn = document.getElementById('continueBtn');
-          continueFaiblesBtn.disabled = state.matieresFaibles.length === 0;
-          continueFaiblesBtn.addEventListener('click', goNext);
+          renderMatieresStep('faibles');
           break;
-
         case 'objectif':
-          const options = getObjectifOptions(state.moyenne || 10);
-          card.innerHTML = `
-            <div class="card-content">
-              <div class="step-label">
-                <span>Étape 6/7</span>
-                <span class="step-progress-text">Étape 6 sur 7</span>
-              </div>
-              <h2 class="heading">Quel est ton objectif ?</h2>
-              <div style="padding: 12px 16px; border-radius: 14px; background: rgba(29, 185, 84, 0.1); margin-bottom: 16px; font-size: 14px; font-weight: 700; color: var(--primary);">
-                Tu es actuellement à ${state.moyenne}/20 de moyenne
-              </div>
-              <div id="objectifList"></div>
-            </div>
-          `;
-          const objectifList = document.getElementById('objectifList');
-          options.forEach(opt => {
-            const objCard = document.createElement('div');
-            objCard.className = 'objectif-card' + (state.objectif === opt.value ? ' selected' : '');
-            objCard.innerHTML = `<div class="label">${opt.label}</div><div class="value">${opt.value}/20</div>`;
-            objCard.addEventListener('click', () => {
-              state.objectif = opt.value;
-              setTimeout(goNext, 400);
-            });
-            objectifList.appendChild(objCard);
-          });
+          renderObjectifStep();
           break;
-
         case 'loading_quiz':
-          card.innerHTML = `
-            <div class="card-content">
-              <div class="loading-container">
-                <div class="spinner"></div>
-                <div class="loading-msg" id="loadingMsg"></div>
-              </div>
-            </div>
-          `;
-          const messages = [
-            `Ok ${state.prenom}, j'ai compris ton profil !`,
-            'Création de ton quiz personnalisé...',
-            'Analyse de ton niveau...',
-            'Sélection des exercices...',
-            'C\'est parti ! 🚀'
-          ];
-          let msgIndex = 0;
-          document.getElementById('loadingMsg').textContent = messages[msgIndex];
-          
-          // Générer les questions du quiz
-          state.quizQuestions = getQuizQuestions();
-          
-          const interval = setInterval(() => {
-            msgIndex++;
-            if (msgIndex >= messages.length) {
-              clearInterval(interval);
-              setTimeout(goNext, 1200);
-            } else {
-              document.getElementById('loadingMsg').textContent = messages[msgIndex];
-            }
-          }, 1500);
+          renderLoadingQuiz();
           break;
-
         case 'quiz':
           renderQuiz();
           break;
-
         case 'recap_app':
-          const results = getQuizResults();
-          const matieresToRenforcer = state.matieresFaibles.map(k => SUBJECTS.find(s => s.key === k)?.label || k).join(', ');
-          card.innerHTML = `
-            <div class="card-content">
-              <div class="text-center mb-16">
-                <h2 class="heading" style="margin-bottom: 10px; font-size: 20px;">Ok, merci pour tes réponses ! 🎉</h2>
-                <p style="color: var(--text-primary); font-size: 15px; line-height: 1.6; margin: 0 0 6px; font-weight: 600;">
-                  J'y vois un peu plus clair sur ton profil. On va bosser ensemble sur ${matieresToRenforcer} et viser ton objectif de <strong style="color: var(--accent);">${state.objectif}/20</strong>. Honnêtement, je pense que tu vas y arriver.
-                </p>
-              </div>
-              <div class="recap-score">
-                <div class="percent">${results.percent}%</div>
-                <div class="label">${results.correct}/${results.total} bonnes réponses au diagnostic</div>
-              </div>
-              <div class="text-center mb-16" style="margin-top: 24px;">
-                <h3 style="font-size: 18px; font-weight: 900; color: var(--text-primary); margin-bottom: 8px;">Voici ce qui t'attend :</h3>
-              </div>
-              <div class="recap-features">
-                <div class="recap-feature">
-                  <div class="recap-feature-icon">🧠</div>
-                  <div class="recap-feature-text">
-                    <div class="title">Un coach IA qui te connaît</div>
-                    <div class="desc">Je vais m'adapter à ton niveau et te proposer un programme sur mesure</div>
-                  </div>
-                </div>
-                <div class="recap-feature">
-                  <div class="recap-feature-icon">📱</div>
-                  <div class="recap-feature-text">
-                    <div class="title">Des quiz et flashcards adaptés</div>
-                    <div class="desc">Révise de façon ludique avec des exercices qui te font vraiment progresser</div>
-                  </div>
-                </div>
-                <div class="recap-feature">
-                  <div class="recap-feature-icon">📊</div>
-                  <div class="recap-feature-text">
-                    <div class="title">Ton tableau de progression</div>
-                    <div class="desc">Suis tes progrès en temps réel et vois les résultats arriver</div>
-                  </div>
-                </div>
-                <div class="recap-feature">
-                  <div class="recap-feature-icon">🔥</div>
-                  <div class="recap-feature-text">
-                    <div class="title">Des rappels intelligents</div>
-                    <div class="desc">On t'aide à garder le rythme sans te spammer</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="card-action">
-              <button class="btn" id="continueBtn">Franchement génial, let's go !</button>
-            </div>
-          `;
-          document.getElementById('continueBtn').addEventListener('click', goNext);
+          renderRecapApp();
           break;
-
         case 'email':
-          card.innerHTML = `
-            <div class="card-content">
-              <div class="text-center mb-16">
-                <div style="font-size: 40px; margin-bottom: 10px;">😊</div>
-                <h2 class="heading" style="margin-bottom: 8px; font-size: 20px;">Content que ça te plaise :)</h2>
-                <p class="subtitle">Avant qu'on continue j'ai besoin que tu crées un compte pour sauvegarder ta progression. Tu veux utiliser quelle adresse mail ?</p>
-              </div>
-              <input type="email" class="input" id="emailInput" placeholder="ton.email@exemple.com" autofocus>
-            </div>
-            <div class="card-action">
-              <button class="btn" id="continueBtn" disabled>Continuer</button>
-            </div>
-          `;
-          const emailInput = document.getElementById('emailInput');
-          const continueEmailBtn = document.getElementById('continueBtn');
-          emailInput.value = state.email;
-          
-          function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-          }
-          
-          emailInput.addEventListener('input', (e) => {
-            state.email = e.target.value.trim();
-            continueEmailBtn.disabled = !isValidEmail(state.email);
-          });
-          emailInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && isValidEmail(state.email)) goNext();
-          });
-          continueEmailBtn.addEventListener('click', goNext);
-          if (isValidEmail(state.email)) continueEmailBtn.disabled = false;
+          renderEmailStep();
           break;
-
         case 'password':
-          card.innerHTML = `
-            <div class="card-content">
-              <div class="text-center mb-16">
-                <h2 class="heading" style="margin-bottom: 8px; font-size: 20px;">C'est tout bon !</h2>
-                <p class="subtitle">Crée-toi un mot de passe, comme "Objectifbrevet" ou "Monchiencestlemeilleur", bref on te laisse choisir :)</p>
-              </div>
-              <input type="password" class="input" id="passwordInput" placeholder="Ton mot de passe (6 caractères min.)" autofocus>
-              <div id="passwordStrength" style="margin-top: 8px; font-size: 13px; font-weight: 700; text-align: center;"></div>
-              <p class="text-center" style="font-size: 11px; color: var(--text-muted); margin-top: 12px;">En créant ton compte, tu acceptes nos conditions d'utilisation.</p>
-            </div>
-            <div class="card-action">
-              <button class="btn" id="continueBtn" disabled>C'est bon j'ai choisi !</button>
-            </div>
-          `;
-          const passwordInput = document.getElementById('passwordInput');
-          const continuePasswordBtn = document.getElementById('continueBtn');
-          const passwordStrength = document.getElementById('passwordStrength');
-          passwordInput.value = state.password;
-          
-          function updatePasswordStrength(password) {
-            if (password.length === 0) {
-              passwordStrength.textContent = '';
-              return;
-            }
-            if (password.length < 6) {
-              passwordStrength.textContent = '❌ Trop court';
-              passwordStrength.style.color = 'var(--red)';
-            } else if (password.length < 10) {
-              passwordStrength.textContent = '✅ Correct';
-              passwordStrength.style.color = 'var(--green)';
-            } else {
-              passwordStrength.textContent = '💪 Excellent !';
-              passwordStrength.style.color = 'var(--accent)';
-            }
-          }
-          
-          passwordInput.addEventListener('input', (e) => {
-            state.password = e.target.value;
-            updatePasswordStrength(state.password);
-            continuePasswordBtn.disabled = state.password.length < 6;
-          });
-          passwordInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && state.password.length >= 6) goNext();
-          });
-          continuePasswordBtn.addEventListener('click', goNext);
-          updatePasswordStrength(state.password);
-          if (state.password.length >= 6) continuePasswordBtn.disabled = false;
+          renderPasswordStep();
           break;
-
         case 'loading_profile':
           renderLoadingProfile();
           break;
-
         case 'paywall':
           renderPaywall();
           break;
       }
+    }
+
+    // ========================================
+    // STEP RENDERERS
+    // ========================================
+    
+    function renderPrenomStep() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape 1/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Comment tu t'appelles ?</h2>
+          <input type="text" class="input" id="prenomInput" placeholder="Ton prénom" autofocus>
+        </div>
+        <div class="card-action">
+          <button class="btn" id="continueBtn" disabled>Continuer</button>
+        </div>
+      `;
+      const prenomInput = document.getElementById('prenomInput');
+      const continueBtn = document.getElementById('continueBtn');
+      prenomInput.value = state.prenom;
+      prenomInput.addEventListener('input', (e) => {
+        state.prenom = e.target.value.trim();
+        continueBtn.disabled = !state.prenom;
+      });
+      prenomInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && state.prenom) {
+          showConfetti();
+          generateSteps();
+          goNext();
+        }
+      });
+      continueBtn.addEventListener('click', () => {
+        showConfetti();
+        generateSteps();
+        goNext();
+      });
+      if (state.prenom) continueBtn.disabled = false;
+    }
+
+    function renderPreparationStep() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Salut ${state.prenom} ! Tu prépares quoi ?</h2>
+          <div class="chips-list" id="preparationList"></div>
+        </div>
+      `;
+      const preparationList = document.getElementById('preparationList');
+      PREPARATIONS.forEach(p => {
+        const chip = document.createElement('div');
+        chip.className = 'chip' + (state.preparation === p.value ? ' selected' : '');
+        chip.innerHTML = `<span class="emoji">${p.emoji}</span><span>${p.label}</span>`;
+        chip.addEventListener('click', () => {
+          state.preparation = p.value;
+          generateSteps();
+          setTimeout(goNext, 300);
+        });
+        preparationList.appendChild(chip);
+      });
+    }
+
+    function renderBrevetClasseStep() {
+      const card = document.getElementById('card');
+      const classes = ['6ème', '5ème', '4ème', '3ème'];
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Tu es en quelle classe ?</h2>
+          <div class="chips-list" id="classeList"></div>
+        </div>
+      `;
+      const classeList = document.getElementById('classeList');
+      classes.forEach(c => {
+        const chip = document.createElement('div');
+        chip.className = 'chip' + (state.sousChoix === c ? ' selected' : '');
+        chip.innerHTML = `<span class="emoji">📚</span><span>${c}</span>`;
+        chip.addEventListener('click', () => {
+          state.sousChoix = c;
+          setTimeout(goNext, 300);
+        });
+        classeList.appendChild(chip);
+      });
+    }
+
+    function renderBacFiliereStep() {
+      const card = document.getElementById('card');
+      const filieres = [
+        'Bac Général',
+        'Bac Techno (STMG, STI2D, ST2S, STL, STHR, STD2A, S2TMD)',
+        'Bac Pro'
+      ];
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Quel bac tu prépares ?</h2>
+          <div class="chips-list" id="filiereList"></div>
+        </div>
+      `;
+      const filiereList = document.getElementById('filiereList');
+      filieres.forEach(f => {
+        const chip = document.createElement('div');
+        chip.className = 'chip' + (state.sousChoix === f ? ' selected' : '');
+        chip.innerHTML = `<span class="emoji">🎓</span><span>${f}</span>`;
+        chip.addEventListener('click', () => {
+          state.sousChoix = f;
+          setTimeout(goNext, 300);
+        });
+        filiereList.appendChild(chip);
+      });
+    }
+
+    function renderBacClasseStep() {
+      const card = document.getElementById('card');
+      const classes = ['Seconde', 'Première', 'Terminale'];
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Tu es en ?</h2>
+          <div class="chips-list" id="classeList"></div>
+        </div>
+      `;
+      const classeList = document.getElementById('classeList');
+      classes.forEach(c => {
+        const chip = document.createElement('div');
+        chip.className = 'chip' + (state.sousChoix2 === c ? ' selected' : '');
+        chip.innerHTML = `<span class="emoji">📖</span><span>${c}</span>`;
+        chip.addEventListener('click', () => {
+          state.sousChoix2 = c;
+          setTimeout(goNext, 300);
+        });
+        classeList.appendChild(chip);
+      });
+    }
+
+    function renderBTSChoixStep() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Quel BTS ?</h2>
+          <p class="subtitle">Cherche ou sélectionne dans la liste</p>
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchBTS" placeholder="Cherche ton BTS...">
+          </div>
+          <div class="chips-list" id="btsList"></div>
+        </div>
+        <div class="card-action">
+          <button class="btn" id="continueBtn" disabled>Continuer</button>
+        </div>
+      `;
+      
+      const searchBTS = document.getElementById('searchBTS');
+      const btsList = document.getElementById('btsList');
+      const continueBtn = document.getElementById('continueBtn');
+      
+      function renderBTSList(filter = '') {
+        btsList.innerHTML = '';
+        const filtered = filter ? BTS_LIST.filter(b => b.toLowerCase().includes(filter.toLowerCase())) : BTS_LIST;
+        
+        filtered.forEach(b => {
+          const chip = document.createElement('div');
+          chip.className = 'chip' + (state.sousChoix === b ? ' selected' : '');
+          chip.innerHTML = `<span class="emoji">🎯</span><span>${b}</span>${state.sousChoix === b ? '<span class="checkmark">✓</span>' : ''}`;
+          chip.addEventListener('click', () => {
+            state.sousChoix = b;
+            continueBtn.disabled = false;
+            renderBTSList(filter);
+          });
+          btsList.appendChild(chip);
+        });
+        
+        // Option "Autre BTS"
+        const autreChip = document.createElement('div');
+        autreChip.className = 'chip' + (state.sousChoix && !BTS_LIST.includes(state.sousChoix) && state.sousChoix !== '' ? ' selected' : '');
+        autreChip.innerHTML = `<span class="emoji">➕</span><span>Autre BTS (précise ci-dessus)</span>`;
+        autreChip.addEventListener('click', () => {
+          const custom = searchBTS.value.trim();
+          if (custom) {
+            state.sousChoix = custom;
+            continueBtn.disabled = false;
+            renderBTSList(filter);
+          } else {
+            alert('Tape le nom de ton BTS dans la barre de recherche puis clique sur "Autre BTS"');
+          }
+        });
+        btsList.appendChild(autreChip);
+      }
+      
+      renderBTSList();
+      searchBTS.addEventListener('input', (e) => {
+        renderBTSList(e.target.value);
+      });
+      
+      continueBtn.addEventListener('click', goNext);
+      if (state.sousChoix) continueBtn.disabled = false;
+    }
+
+    function renderBUTChoixStep() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Quel BUT ?</h2>
+          <p class="subtitle">Cherche ou sélectionne dans la liste</p>
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchBUT" placeholder="Cherche ton BUT...">
+          </div>
+          <div class="chips-list" id="butList"></div>
+        </div>
+        <div class="card-action">
+          <button class="btn" id="continueBtn" disabled>Continuer</button>
+        </div>
+      `;
+      
+      const searchBUT = document.getElementById('searchBUT');
+      const butList = document.getElementById('butList');
+      const continueBtn = document.getElementById('continueBtn');
+      
+      function renderBUTList(filter = '') {
+        butList.innerHTML = '';
+        const filtered = filter ? BUT_LIST.filter(b => b.toLowerCase().includes(filter.toLowerCase())) : BUT_LIST;
+        
+        filtered.forEach(b => {
+          const chip = document.createElement('div');
+          chip.className = 'chip' + (state.sousChoix === b ? ' selected' : '');
+          chip.innerHTML = `<span class="emoji">🏫</span><span>${b}</span>${state.sousChoix === b ? '<span class="checkmark">✓</span>' : ''}`;
+          chip.addEventListener('click', () => {
+            state.sousChoix = b;
+            continueBtn.disabled = false;
+            renderBUTList(filter);
+          });
+          butList.appendChild(chip);
+        });
+        
+        // Option "Autre BUT"
+        const autreChip = document.createElement('div');
+        autreChip.className = 'chip' + (state.sousChoix && !BUT_LIST.includes(state.sousChoix) && state.sousChoix !== '' ? ' selected' : '');
+        autreChip.innerHTML = `<span class="emoji">➕</span><span>Autre BUT (précise ci-dessus)</span>`;
+        autreChip.addEventListener('click', () => {
+          const custom = searchBUT.value.trim();
+          if (custom) {
+            state.sousChoix = custom;
+            continueBtn.disabled = false;
+            renderBUTList(filter);
+          } else {
+            alert('Tape le nom de ton BUT dans la barre de recherche puis clique sur "Autre BUT"');
+          }
+        });
+        butList.appendChild(autreChip);
+      }
+      
+      renderBUTList();
+      searchBUT.addEventListener('input', (e) => {
+        renderBUTList(e.target.value);
+      });
+      
+      continueBtn.addEventListener('click', goNext);
+      if (state.sousChoix) continueBtn.disabled = false;
+    }
+
+    function renderConcoursChoixStep() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Quel concours ?</h2>
+          <div class="chips-list" id="concoursList"></div>
+        </div>
+        <div class="card-action">
+          <input type="text" class="input" id="autreConcoursInput" placeholder="Autre concours (précise)" style="margin-bottom: 8px; display: none;">
+          <button class="btn" id="continueBtn" disabled>Continuer</button>
+        </div>
+      `;
+      
+      const concoursList = document.getElementById('concoursList');
+      const autreInput = document.getElementById('autreConcoursInput');
+      const continueBtn = document.getElementById('continueBtn');
+      
+      CONCOURS_LIST.forEach(c => {
+        const chip = document.createElement('div');
+        chip.className = 'chip' + (state.sousChoix === c ? ' selected' : '');
+        chip.innerHTML = `<span class="emoji">📝</span><span>${c}</span>`;
+        chip.addEventListener('click', () => {
+          state.sousChoix = c;
+          autreInput.style.display = 'none';
+          continueBtn.disabled = false;
+          setTimeout(goNext, 300);
+        });
+        concoursList.appendChild(chip);
+      });
+      
+      // Option "Autre"
+      const autreChip = document.createElement('div');
+      autreChip.className = 'chip';
+      autreChip.innerHTML = `<span class="emoji">➕</span><span>Autre</span>`;
+      autreChip.addEventListener('click', () => {
+        autreInput.style.display = 'block';
+        autreInput.focus();
+      });
+      concoursList.appendChild(autreChip);
+      
+      autreInput.addEventListener('input', (e) => {
+        state.sousChoix = e.target.value.trim();
+        continueBtn.disabled = !state.sousChoix;
+      });
+      
+      continueBtn.addEventListener('click', goNext);
+      if (state.sousChoix) continueBtn.disabled = false;
+    }
+
+    function renderCodePermisStep() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Quel permis ?</h2>
+          <div class="chips-list" id="permisList"></div>
+        </div>
+      `;
+      
+      const permisList = document.getElementById('permisList');
+      PERMIS_LIST.forEach(p => {
+        const chip = document.createElement('div');
+        chip.className = 'chip' + (state.sousChoix === p ? ' selected' : '');
+        chip.innerHTML = `<span class="emoji">🚗</span><span>${p}</span>`;
+        chip.addEventListener('click', () => {
+          state.sousChoix = p;
+          setTimeout(goNext, 300);
+        });
+        permisList.appendChild(chip);
+      });
+    }
+
+    function renderLangueChoixStep() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Quelle langue ?</h2>
+          <div class="chips-list" id="langueList"></div>
+        </div>
+        <div class="card-action">
+          <input type="text" class="input" id="autreLangueInput" placeholder="Autre langue (précise)" style="margin-bottom: 8px; display: none;">
+          <button class="btn" id="continueBtn" disabled>Continuer</button>
+        </div>
+      `;
+      
+      const langueList = document.getElementById('langueList');
+      const autreInput = document.getElementById('autreLangueInput');
+      const continueBtn = document.getElementById('continueBtn');
+      
+      LANGUES_LIST.forEach(l => {
+        const chip = document.createElement('div');
+        chip.className = 'chip' + (state.sousChoix === l ? ' selected' : '');
+        chip.innerHTML = `<span class="emoji">🌍</span><span>${l}</span>`;
+        chip.addEventListener('click', () => {
+          state.sousChoix = l;
+          autreInput.style.display = 'none';
+          continueBtn.disabled = false;
+          setTimeout(goNext, 300);
+        });
+        langueList.appendChild(chip);
+      });
+      
+      // Option "Autre"
+      const autreChip = document.createElement('div');
+      autreChip.className = 'chip';
+      autreChip.innerHTML = `<span class="emoji">➕</span><span>Autre</span>`;
+      autreChip.addEventListener('click', () => {
+        autreInput.style.display = 'block';
+        autreInput.focus();
+      });
+      langueList.appendChild(autreChip);
+      
+      autreInput.addEventListener('input', (e) => {
+        state.sousChoix = e.target.value.trim();
+        continueBtn.disabled = !state.sousChoix;
+      });
+      
+      continueBtn.addEventListener('click', goNext);
+      if (state.sousChoix) continueBtn.disabled = false;
+    }
+
+    function renderPrimaireClasseStep() {
+      const card = document.getElementById('card');
+      const classes = ['CM1', 'CM2'];
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Tu es en quelle classe ?</h2>
+          <div class="chips-list" id="classeList"></div>
+        </div>
+      `;
+      const classeList = document.getElementById('classeList');
+      classes.forEach(c => {
+        const chip = document.createElement('div');
+        chip.className = 'chip' + (state.sousChoix === c ? ' selected' : '');
+        chip.innerHTML = `<span class="emoji">📖</span><span>${c}</span>`;
+        chip.addEventListener('click', () => {
+          state.sousChoix = c;
+          setTimeout(goNext, 300);
+        });
+        classeList.appendChild(chip);
+      });
+    }
+
+    function renderAutreTexteStep() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Qu'est-ce que tu prépares exactement ?</h2>
+          <p class="subtitle">Décris-nous ton objectif !</p>
+          <input type="text" class="input" id="autreInput" placeholder="Ex: CAP, certification..." autofocus>
+        </div>
+        <div class="card-action">
+          <button class="btn" id="continueBtn" disabled>Continuer</button>
+        </div>
+      `;
+      const autreInput = document.getElementById('autreInput');
+      const continueBtn = document.getElementById('continueBtn');
+      autreInput.value = state.autreTexte;
+      autreInput.addEventListener('input', (e) => {
+        state.autreTexte = e.target.value.trim();
+        continueBtn.disabled = !state.autreTexte;
+      });
+      autreInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && state.autreTexte) goNext();
+      });
+      continueBtn.addEventListener('click', goNext);
+      if (state.autreTexte) continueBtn.disabled = false;
+    }
+
+    function renderMoyenneStep() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Quelle est ta moyenne générale à peu près ?</h2>
+          <p class="subtitle">Pas de jugement ! On est là pour t'aider, pas pour te noter 😊</p>
+          <div class="input-wrapper">
+            <input type="text" inputmode="decimal" class="input" id="moyenneInput" placeholder="Ex: 12.5" autofocus>
+            <span class="input-suffix">/ 20</span>
+          </div>
+        </div>
+        <div class="card-action">
+          <button class="btn" id="continueBtn" disabled>Continuer</button>
+        </div>
+      `;
+      const moyenneInput = document.getElementById('moyenneInput');
+      const continueMoyenneBtn = document.getElementById('continueBtn');
+      moyenneInput.addEventListener('input', (e) => {
+        const val = e.target.value.replace(',', '.');
+        const num = parseFloat(val);
+        if (!isNaN(num) && num >= 0 && num <= 20) {
+          state.moyenne = Math.round(num * 10) / 10;
+          continueMoyenneBtn.disabled = false;
+        } else {
+          state.moyenne = null;
+          continueMoyenneBtn.disabled = true;
+        }
+      });
+      moyenneInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && state.moyenne !== null) goNext();
+      });
+      continueMoyenneBtn.addEventListener('click', goNext);
+    }
+
+    function renderMatieresStep(type) {
+      const card = document.getElementById('card');
+      const isFortes = type === 'fortes';
+      const title = isFortes ? 'Dans quelles matières tu te sens déjà à l\'aise ?' : 'Et les matières où tu veux progresser ? 🚀';
+      const subtitle = isFortes ? 'Tu peux en sélectionner aucune si tu le souhaites' : 'C\'est justement là qu\'on va te faire décoller !';
+      const key = isFortes ? 'matieresFortes' : 'matieresFaibles';
+      
+      const availableMatieres = isFortes ? state.matieres : state.matieres.filter(m => !state.matieresFortes.includes(m.key));
+      
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">${title}</h2>
+          <p class="subtitle">${subtitle}</p>
+          <div class="chips-list" id="matieresList"></div>
+        </div>
+        <div class="card-action">
+          <button class="btn" id="continueBtn" ${!isFortes && state[key].length === 0 ? 'disabled' : ''}>Continuer</button>
+        </div>
+      `;
+      
+      const matieresList = document.getElementById('matieresList');
+      availableMatieres.forEach(m => {
+        const chip = document.createElement('div');
+        const selected = state[key].includes(m.key);
+        chip.className = 'chip' + (selected ? ' selected' : '');
+        chip.innerHTML = `<span class="emoji">${m.emoji}</span><span>${m.label}</span>${selected ? '<span class="checkmark">✓</span>' : ''}`;
+        chip.addEventListener('click', () => {
+          if (state[key].includes(m.key)) {
+            state[key] = state[key].filter(k => k !== m.key);
+          } else {
+            state[key].push(m.key);
+          }
+          renderStep();
+        });
+        matieresList.appendChild(chip);
+      });
+      
+      document.getElementById('continueBtn').addEventListener('click', goNext);
+    }
+
+    function renderObjectifStep() {
+      const card = document.getElementById('card');
+      const options = getObjectifOptions(state.moyenne || 10);
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="step-label">
+            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
+          </div>
+          <h2 class="heading">Quel est ton objectif ?</h2>
+          <div style="padding: 12px 16px; border-radius: 14px; background: rgba(29, 185, 84, 0.1); margin-bottom: 16px; font-size: 14px; font-weight: 700; color: var(--primary);">
+            Tu es actuellement à ${state.moyenne}/20 de moyenne
+          </div>
+          <div id="objectifList"></div>
+        </div>
+      `;
+
+      const objectifList = document.getElementById('objectifList');
+      options.forEach(opt => {
+        const objCard = document.createElement('div');
+        objCard.className = 'objectif-card' + (state.objectif === opt.value ? ' selected' : '');
+        objCard.innerHTML = `<div class="label">${opt.label}</div><div class="value">${opt.value}/20</div>`;
+        objCard.addEventListener('click', () => {
+          state.objectif = opt.value;
+          setTimeout(goNext, 400);
+        });
+        objectifList.appendChild(objCard);
+      });
+    }
+
+    function getObjectifOptions(moyenne) {
+      if (moyenne < 8) {
+        return [
+          { label: 'Remonter à 10 et sécuriser le brevet', value: 10 },
+          { label: 'Viser 12-13 et décrocher une mention', value: 12 },
+          { label: 'Tout casser et viser 15+', value: 15 }
+        ];
+      }
+      if (moyenne < 11) {
+        return [
+          { label: 'Consolider et monter à 12', value: 12 },
+          { label: 'Progresser sérieusement pour atteindre 14-15', value: 14 },
+          { label: 'Tout casser et viser la mention Très Bien (16+)', value: 16 }
+        ];
+      }
+      if (moyenne < 14) {
+        return [
+          { label: 'Maintenir le cap et sécuriser la mention', value: Math.ceil(moyenne) + 1 },
+          { label: 'S\'améliorer et viser 15-16', value: 15 },
+          { label: 'Viser l\'excellence : 18+', value: 18 }
+        ];
+      }
+      return [
+        { label: 'Maintenir ton excellent niveau', value: Math.ceil(moyenne) },
+        { label: 'Viser 17-18 et la mention Très Bien', value: 17 },
+        { label: 'Objectif 19-20 : le sans-faute', value: 19 }
+      ];
+    }
+
+    function renderLoadingQuiz() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="loading-container">
+            <div class="spinner"></div>
+            <div class="loading-msg" id="loadingMsg"></div>
+          </div>
+        </div>
+      `;
+      const messages = [
+        `Ok ${state.prenom}, j'ai compris ton profil !`,
+        'Création de ton quiz personnalisé...',
+        'Analyse de ton niveau...',
+        'Sélection des exercices...',
+        'C\'est parti ! 🚀'
+      ];
+      let msgIndex = 0;
+      document.getElementById('loadingMsg').textContent = messages[msgIndex];
+      
+      // Générer les questions du quiz
+      state.quizQuestions = getQuizQuestions();
+      
+      const interval = setInterval(() => {
+        msgIndex++;
+        if (msgIndex >= messages.length) {
+          clearInterval(interval);
+          setTimeout(goNext, 1200);
+        } else {
+          document.getElementById('loadingMsg').textContent = messages[msgIndex];
+        }
+      }, 1500);
     }
 
     // ========================================
@@ -2101,9 +2728,157 @@
       }
     }
 
-    // ========================================
-    // LOADING PROFILE
-    // ========================================
+    function getQuizResults() {
+      let correct = 0;
+      const total = state.quizQuestions.length;
+      state.quizQuestions.forEach(q => {
+        if (state.quizAnswers[q.id] === q.correctAnswerIndex) correct++;
+      });
+      return { correct, total, percent: Math.round((correct / total) * 100) };
+    }
+
+    function renderRecapApp() {
+      const results = getQuizResults();
+      const matieresToRenforcer = state.matieresFaibles.map(k => state.matieres.find(s => s.key === k)?.label || k).join(', ') || 'les matières choisies';
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="text-center mb-16">
+            <h2 class="heading" style="margin-bottom: 10px; font-size: 20px;">Ok, merci pour tes réponses ! 🎉</h2>
+            <p style="color: var(--text-primary); font-size: 15px; line-height: 1.6; margin: 0 0 6px; font-weight: 600;">
+              J'y vois un peu plus clair sur ton profil. On va bosser ensemble sur ${matieresToRenforcer}${state.objectif ? ' et viser ton objectif de <strong style="color: var(--accent);">' + state.objectif + '/20</strong>' : ''}. Honnêtement, je pense que tu vas y arriver.
+            </p>
+          </div>
+          <div class="recap-score">
+            <div class="percent">${results.percent}%</div>
+            <div class="label">${results.correct}/${results.total} bonnes réponses au diagnostic</div>
+          </div>
+          <div class="text-center mb-16" style="margin-top: 24px;">
+            <h3 style="font-size: 18px; font-weight: 900; color: var(--text-primary); margin-bottom: 8px;">Voici ce qui t'attend :</h3>
+          </div>
+          <div class="recap-features">
+            <div class="recap-feature">
+              <div class="recap-feature-icon">🧠</div>
+              <div class="recap-feature-text">
+                <div class="title">Un coach IA qui te connaît</div>
+                <div class="desc">Je vais m'adapter à ton niveau et te proposer un programme sur mesure</div>
+              </div>
+            </div>
+            <div class="recap-feature">
+              <div class="recap-feature-icon">📱</div>
+              <div class="recap-feature-text">
+                <div class="title">Des quiz et flashcards adaptés</div>
+                <div class="desc">Révise de façon ludique avec des exercices qui te font vraiment progresser</div>
+              </div>
+            </div>
+            <div class="recap-feature">
+              <div class="recap-feature-icon">📊</div>
+              <div class="recap-feature-text">
+                <div class="title">Ton tableau de progression</div>
+                <div class="desc">Suis tes progrès en temps réel et vois les résultats arriver</div>
+              </div>
+            </div>
+            <div class="recap-feature">
+              <div class="recap-feature-icon">🔥</div>
+              <div class="recap-feature-text">
+                <div class="title">Des rappels intelligents</div>
+                <div class="desc">On t'aide à garder le rythme sans te spammer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-action">
+          <button class="btn" id="continueBtn">Franchement génial, let's go !</button>
+        </div>
+      `;
+      document.getElementById('continueBtn').addEventListener('click', goNext);
+    }
+
+    function renderEmailStep() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="text-center mb-16">
+            <div style="font-size: 40px; margin-bottom: 10px;">😊</div>
+            <h2 class="heading" style="margin-bottom: 8px; font-size: 20px;">Content que ça te plaise :)</h2>
+            <p class="subtitle">Avant qu'on continue j'ai besoin que tu crées un compte pour sauvegarder ta progression. Tu veux utiliser quelle adresse mail ?</p>
+          </div>
+          <input type="email" class="input" id="emailInput" placeholder="ton.email@exemple.com" autofocus>
+        </div>
+        <div class="card-action">
+          <button class="btn" id="continueBtn" disabled>Continuer</button>
+        </div>
+      `;
+      const emailInput = document.getElementById('emailInput');
+      const continueEmailBtn = document.getElementById('continueBtn');
+      emailInput.value = state.email;
+      
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+      
+      emailInput.addEventListener('input', (e) => {
+        state.email = e.target.value.trim();
+        continueEmailBtn.disabled = !isValidEmail(state.email);
+      });
+      emailInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && isValidEmail(state.email)) goNext();
+      });
+      continueEmailBtn.addEventListener('click', goNext);
+      if (isValidEmail(state.email)) continueEmailBtn.disabled = false;
+    }
+
+    function renderPasswordStep() {
+      const card = document.getElementById('card');
+      card.innerHTML = `
+        <div class="card-content">
+          <div class="text-center mb-16">
+            <h2 class="heading" style="margin-bottom: 8px; font-size: 20px;">C'est tout bon !</h2>
+            <p class="subtitle">Crée-toi un mot de passe, comme "Objectifbrevet" ou "Monchiencestlemeilleur", bref on te laisse choisir :)</p>
+          </div>
+          <input type="password" class="input" id="passwordInput" placeholder="Ton mot de passe (6 caractères min.)" autofocus>
+          <div id="passwordStrength" style="margin-top: 8px; font-size: 13px; font-weight: 700; text-align: center;"></div>
+          <p class="text-center" style="font-size: 11px; color: var(--text-muted); margin-top: 12px;">En créant ton compte, tu acceptes nos conditions d'utilisation.</p>
+        </div>
+        <div class="card-action">
+          <button class="btn" id="continueBtn" disabled>C'est bon j'ai choisi !</button>
+        </div>
+      `;
+      const passwordInput = document.getElementById('passwordInput');
+      const continuePasswordBtn = document.getElementById('continueBtn');
+      const passwordStrength = document.getElementById('passwordStrength');
+      passwordInput.value = state.password;
+      
+      function updatePasswordStrength(password) {
+        if (password.length === 0) {
+          passwordStrength.textContent = '';
+          return;
+        }
+        if (password.length < 6) {
+          passwordStrength.textContent = '❌ Trop court';
+          passwordStrength.style.color = 'var(--red)';
+        } else if (password.length < 10) {
+          passwordStrength.textContent = '✅ Correct';
+          passwordStrength.style.color = 'var(--green)';
+        } else {
+          passwordStrength.textContent = '💪 Excellent !';
+          passwordStrength.style.color = 'var(--accent)';
+        }
+      }
+      
+      passwordInput.addEventListener('input', (e) => {
+        state.password = e.target.value;
+        updatePasswordStrength(state.password);
+        continuePasswordBtn.disabled = state.password.length < 6;
+      });
+      passwordInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && state.password.length >= 6) goNext();
+      });
+      continuePasswordBtn.addEventListener('click', goNext);
+      updatePasswordStrength(state.password);
+      if (state.password.length >= 6) continuePasswordBtn.disabled = false;
+    }
+
     function renderLoadingProfile() {
       const card = document.getElementById('card');
       
@@ -2135,7 +2910,7 @@
       ];
 
       const userSubjects = state.matieresFaibles.length > 0 
-        ? state.matieresFaibles.map(k => SUBJECTS.find(s => s.key === k)?.label || k)
+        ? state.matieresFaibles.map(k => state.matieres.find(s => s.key === k)?.label || k)
         : ['Mathématiques', 'Français', 'Histoire-Géo'];
 
       const fakeResults = [];
@@ -2209,9 +2984,6 @@
       });
     }
 
-    // ========================================
-    // PAYWALL
-    // ========================================
     function renderPaywall() {
       const card = document.getElementById('card');
 
@@ -2223,8 +2995,8 @@
         localStorage.setItem(placesKey, places);
       }
 
-      const classeLabel = CLASSES.find(c => c.value === state.classe)?.label || state.classe;
-      const matieresToRenforcer = state.matieresFaibles.map(k => SUBJECTS.find(s => s.key === k)?.label || k).join(', ');
+      const preparationLabel = PREPARATIONS.find(p => p.value === state.preparation)?.label || state.preparation;
+      const matieresToRenforcer = state.matieresFaibles.map(k => state.matieres.find(s => s.key === k)?.label || k).join(', ') || 'tes matières';
 
       card.innerHTML = `
         <div class="card-content">
@@ -2235,8 +3007,8 @@
 
           <div class="paywall-summary">
             <div class="paywall-summary-row">
-              <span class="key">Classe/Situation</span>
-              <span class="value">${classeLabel}</span>
+              <span class="key">Préparation</span>
+              <span class="value">${preparationLabel}</span>
             </div>
             <div class="paywall-summary-row">
               <span class="key">Score au quiz</span>
@@ -2305,44 +3077,6 @@
     // ========================================
     // HELPERS
     // ========================================
-    function getObjectifOptions(moyenne) {
-      if (moyenne < 8) {
-        return [
-          { label: 'Remonter à 10 et sécuriser le brevet', value: 10 },
-          { label: 'Viser 12-13 et décrocher une mention', value: 12 },
-          { label: 'Tout casser et viser 15+', value: 15 }
-        ];
-      }
-      if (moyenne < 11) {
-        return [
-          { label: 'Consolider et monter à 12', value: 12 },
-          { label: 'Progresser sérieusement pour atteindre 14-15', value: 14 },
-          { label: 'Tout casser et viser la mention Très Bien (16+)', value: 16 }
-        ];
-      }
-      if (moyenne < 14) {
-        return [
-          { label: 'Maintenir le cap et sécuriser la mention', value: Math.ceil(moyenne) + 1 },
-          { label: 'S\'améliorer et viser 15-16', value: 15 },
-          { label: 'Viser l\'excellence : 18+', value: 18 }
-        ];
-      }
-      return [
-        { label: 'Maintenir ton excellent niveau', value: Math.ceil(moyenne) },
-        { label: 'Viser 17-18 et la mention Très Bien', value: 17 },
-        { label: 'Objectif 19-20 : le sans-faute', value: 19 }
-      ];
-    }
-
-    function getQuizResults() {
-      let correct = 0;
-      const total = state.quizQuestions.length;
-      state.quizQuestions.forEach(q => {
-        if (state.quizAnswers[q.id] === q.correctAnswerIndex) correct++;
-      });
-      return { correct, total, percent: Math.round((correct / total) * 100) };
-    }
-
     function showConfetti() {
       const container = document.getElementById('confetti');
       container.innerHTML = '';
@@ -2363,6 +3097,7 @@
     // ========================================
     // INIT
     // ========================================
+    generateSteps();
     updateProgress();
     renderStep();
   </script>
