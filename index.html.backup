@@ -161,6 +161,7 @@
       font-weight: 900;
       overflow: visible;
       padding-right: 8px;
+      padding-top: 14px;
     }
 
     .logo-oo::after {
@@ -218,7 +219,7 @@
       max-width: 460px;
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
-      border-radius: 16px 16px 0 0;
+      border-radius: 28px 28px 0 0;
       box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
       position: relative;
       z-index: 10;
@@ -228,7 +229,6 @@
       flex-direction: column;
       overflow: hidden;
       margin: 0 16px 0 16px;
-      max-height: calc(100dvh - 72px);
     }
 
     .card.fade-in {
@@ -249,9 +249,6 @@
     }
 
     .card-action {
-      position: sticky;
-      bottom: 0;
-      z-index: 10;
       padding: 16px 20px 20px 20px;
       background: linear-gradient(to bottom, transparent 0%, var(--bg-surface) 20%);
       flex-shrink: 0;
@@ -264,17 +261,6 @@
       text-transform: uppercase;
       letter-spacing: 0.06em;
       margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .step-progress-text {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: none;
-      letter-spacing: 0;
     }
 
     .heading {
@@ -298,7 +284,7 @@
     .input {
       width: 100%;
       padding: 14px 16px;
-      border-radius: 12px;
+      border-radius: 16px;
       border: 2px solid var(--border-subtle);
       font-size: 16px;
       font-weight: 600;
@@ -335,7 +321,7 @@
     .btn {
       width: 100%;
       padding: 15px 24px;
-      border-radius: 12px;
+      border-radius: 50px;
       border: none;
       background: var(--primary);
       color: var(--text-primary);
@@ -385,7 +371,7 @@
       align-items: center;
       gap: 10px;
       padding: 14px 16px;
-      border-radius: 12px;
+      border-radius: 16px;
       border: 2px solid rgba(255, 255, 255, 0.15);
       background: var(--bg-surface);
       cursor: pointer;
@@ -672,68 +658,53 @@
       font-weight: 600;
     }
 
-    .recap-features {
+    .recap-bullets {
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      margin-bottom: 16px;
-      margin-top: 24px;
+      gap: 12px;
+      margin-bottom: 8px;
     }
 
-    .recap-feature {
+    .recap-bullet {
       display: flex;
-      align-items: center;
-      gap: 14px;
-      opacity: 0;
-      transform: translateX(-20px);
-      animation: slideInLeft 0.5s ease-out forwards;
+      gap: 12px;
+      align-items: flex-start;
     }
 
-    .recap-feature:nth-child(1) { animation-delay: 0.1s; }
-    .recap-feature:nth-child(2) { animation-delay: 0.25s; }
-    .recap-feature:nth-child(3) { animation-delay: 0.4s; }
-    .recap-feature:nth-child(4) { animation-delay: 0.55s; }
-
-    @keyframes slideInLeft {
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .recap-feature-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: rgba(29, 185, 84, 0.1);
+    .recap-bullet .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 18px;
       flex-shrink: 0;
-      animation: iconPulse 2s ease-in-out infinite;
     }
 
-    @keyframes iconPulse {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.05);
-      }
+    .recap-bullet .icon.blue {
+      background: rgba(29, 185, 84, 0.1);
     }
 
-    .recap-feature-text .title {
-      font-size: 15px;
+    .recap-bullet .icon.yellow {
+      background: rgba(245, 197, 24, 0.1);
+    }
+
+    .recap-bullet .icon.green {
+      background: #f0fdf4;
+    }
+
+    .recap-bullet .text .title {
       font-weight: 800;
+      font-size: 14px;
       color: var(--text-primary);
       margin-bottom: 2px;
     }
 
-    .recap-feature-text .desc {
+    .recap-bullet .text .desc {
       font-size: 13px;
       color: var(--text-secondary);
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
     /* ========================================
@@ -741,7 +712,7 @@
        ======================================== */
     .paywall-hero {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .paywall-hero .emoji {
@@ -755,120 +726,63 @@
       font-weight: 900;
       color: var(--text-primary);
       margin-bottom: 8px;
-      line-height: 1.2;
+    }
+
+    .paywall-hero .subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.6;
     }
 
     .paywall-summary {
-      padding: 18px;
+      padding: 16px;
       border-radius: 16px;
-      background: var(--bg-surface);
+      background: rgba(29, 185, 84, 0.05);
       border: 1px solid var(--border-subtle);
-      margin-bottom: 20px;
-      font-size: 13px;
+      margin-bottom: 16px;
+      font-size: 14px;
       color: var(--text-secondary);
       line-height: 1.7;
     }
 
-    .paywall-summary-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .paywall-summary-row:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-
-    .paywall-summary-row .key {
-      color: var(--text-secondary);
-      font-weight: 600;
-    }
-
-    .paywall-summary-row .value {
+    .paywall-summary strong {
       color: var(--text-primary);
-      font-weight: 800;
-    }
-
-    .paywall-benefits {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .paywall-benefit {
-      padding: 12px;
-      border-radius: 12px;
-      background: rgba(29, 185, 84, 0.05);
-      border: 1px solid var(--border-subtle);
-      text-align: center;
-      font-size: 12px;
       font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.4;
     }
 
-    .paywall-benefit .icon {
-      font-size: 20px;
-      display: block;
-      margin-bottom: 6px;
+    .paywall-features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .paywall-feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .paywall-feature .icon {
+      font-size: 18px;
     }
 
     .paywall-stars {
       text-align: center;
       font-size: 20px;
       color: var(--accent);
-      margin-bottom: 8px;
+      margin-bottom: 16px;
       filter: drop-shadow(0 0 4px rgba(245, 197, 24, 0.5));
-    }
-
-    .paywall-rating {
-      text-align: center;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      margin-bottom: 20px;
-    }
-
-    .paywall-testimonial {
-      padding: 16px;
-      border-radius: 14px;
-      background: rgba(245, 197, 24, 0.05);
-      border: 1px solid var(--border-subtle);
-      margin-bottom: 20px;
-      font-size: 14px;
-      color: var(--text-primary);
-      line-height: 1.6;
-      font-style: italic;
-    }
-
-    .paywall-testimonial .author {
-      font-style: normal;
-      font-weight: 700;
-      color: var(--text-secondary);
-      margin-top: 8px;
-      font-size: 13px;
-    }
-
-    .paywall-offer {
-      padding: 20px;
-      border-radius: 16px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      margin-bottom: 20px;
-      text-align: center;
     }
 
     .paywall-badge {
       display: inline-block;
       background: linear-gradient(135deg, var(--red), #ff6b6b);
       color: var(--text-primary);
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
       padding: 6px 12px;
       border-radius: 999px;
@@ -891,7 +805,7 @@
       text-align: center;
       font-size: 13px;
       color: var(--text-secondary);
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .paywall-places strong {
@@ -900,6 +814,7 @@
     }
 
     .paywall-pricing {
+      text-align: center;
       margin-bottom: 16px;
     }
 
@@ -909,27 +824,15 @@
       color: var(--text-muted);
       text-decoration: line-through;
       margin-bottom: 4px;
-      position: relative;
-    }
-
-    .paywall-old-price::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--red);
-      transform: translateY(-50%);
-      animation: strikethrough 0.8s ease-out forwards;
+      animation: strikethrough 1s ease-out forwards;
     }
 
     @keyframes strikethrough {
       from {
-        width: 0;
+        opacity: 1;
       }
       to {
-        width: 100%;
+        opacity: 0.6;
       }
     }
 
@@ -938,7 +841,7 @@
       font-weight: 900;
       color: var(--primary);
       line-height: 1;
-      margin-bottom: 0;
+      margin-bottom: 4px;
       animation: priceGlow 2s ease-in-out infinite;
     }
 
@@ -951,33 +854,58 @@
       }
     }
 
-    .paywall-period {
-      font-size: 16px;
-      color: var(--text-secondary);
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-
     .paywall-discount {
       display: inline-block;
       background: var(--accent);
       color: var(--bg-page);
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 900;
-      padding: 6px 16px;
+      padding: 4px 12px;
       border-radius: 999px;
+      margin-bottom: 16px;
     }
 
+    .paywall-timer {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
 
+    .paywall-timer .time {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--red);
+      font-family: 'Courier New', monospace;
+    }
+
+    .paywall-testimonial {
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(245, 197, 24, 0.05);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    .paywall-testimonial .author {
+      font-style: normal;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
 
     .paywall-cta {
       width: 100%;
-      padding: 18px 32px;
-      border-radius: 12px;
+      padding: 20px 32px;
+      border-radius: 50px;
       border: none;
       background: var(--primary);
       color: var(--text-primary);
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 900;
       cursor: pointer;
       box-shadow: 0 12px 32px rgba(29, 185, 84, 0.4);
@@ -1004,26 +932,20 @@
     .paywall-guarantee {
       text-align: center;
       font-size: 12px;
-      color: var(--text-secondary);
-      line-height: 1.7;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px 16px;
+      color: var(--text-muted);
+      line-height: 1.6;
     }
 
-    .paywall-guarantee-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-weight: 600;
+    .paywall-guarantee .icon {
+      display: inline-block;
+      margin: 0 4px;
     }
 
     /* ========================================
        PROFILE LOADING
        ======================================== */
     .profile-loading-container {
-      padding: 16px 0;
+      padding: 24px 0;
     }
 
     .circular-progress {
@@ -1031,78 +953,56 @@
       margin-bottom: 24px;
     }
 
-    .circular-progress svg {
-      width: 120px;
-      height: 120px;
-      margin: 0 auto 16px;
-      transform: rotate(-90deg);
-    }
-
-    .circular-progress circle {
-      fill: none;
-      stroke-width: 8;
-    }
-
-    .circular-progress .circle-bg {
-      stroke: var(--border-subtle);
-    }
-
-    .circular-progress .circle-progress {
-      stroke: var(--primary);
-      stroke-linecap: round;
-      transition: stroke-dashoffset 0.3s ease;
-    }
-
-    .circular-progress .percent-text {
-      font-size: 24px;
-      font-weight: 900;
-      fill: var(--text-primary);
-    }
-
-    .loading-phase {
-      text-align: center;
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--text-primary);
-      margin-bottom: 24px;
-      min-height: 28px;
+    .circular-progress .circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      margin: 0 auto 16px;
+      transition: background 0.3s;
     }
 
-    .loading-phase .icon {
-      font-size: 20px;
+    .circular-progress .circle-inner {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 18px;
+      color: var(--text-primary);
     }
 
-    .profile-results {
+    .profile-messages {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 200px;
-      overflow-y: auto;
-      padding-right: 8px;
     }
 
-    .profile-result {
+    .profile-message {
       padding: 10px 14px;
       border-radius: 12px;
-      background: rgba(29, 185, 84, 0.05);
-      border: 1px solid var(--border-subtle);
       font-size: 13px;
       font-weight: 700;
       color: var(--text-primary);
       animation: fadeInUp 0.4s ease-out;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      line-height: 1.4;
     }
 
-    .profile-result .check {
+    .profile-message.active {
+      background: rgba(245, 197, 24, 0.1);
+    }
+
+    .profile-message.done {
+      background: rgba(29, 185, 84, 0.1);
+    }
+
+    .profile-message.success {
       color: var(--green);
-      font-size: 16px;
-      font-weight: 900;
     }
 
     /* ========================================
@@ -1155,9 +1055,8 @@
       }
 
       .card {
-        border-radius: 16px 16px 0 0;
+        border-radius: 24px 24px 0 0;
         margin: 0 8px 0 8px;
-        max-height: calc(100dvh - 64px);
       }
 
       .card-content {
@@ -1184,36 +1083,12 @@
       }
 
       .paywall-new-price {
-        font-size: 42px;
+        font-size: 40px;
       }
 
       .paywall-cta {
         font-size: 16px;
         padding: 16px 24px;
-      }
-
-      .paywall-summary {
-        font-size: 12px;
-        padding: 14px;
-      }
-
-      .paywall-benefits {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
-
-      .recap-feature-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 20px;
-      }
-
-      .recap-feature-text .title {
-        font-size: 14px;
-      }
-
-      .recap-feature-text .desc {
-        font-size: 12px;
       }
     }
 
@@ -1230,24 +1105,6 @@
 
       .chip .emoji {
         font-size: 16px;
-      }
-
-      .paywall-new-price {
-        font-size: 38px;
-      }
-
-      .paywall-hero .title {
-        font-size: 20px;
-      }
-    }
-
-    /* ========================================
-       ACCESSIBILITY
-       ======================================== */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
       }
     }
 
@@ -1603,7 +1460,6 @@
       matieresFortes: [],
       matieresFaibles: [],
       objectif: null,
-      quizQuestions: [],
       quizAnswers: {},
       email: '',
       password: ''
@@ -1648,10 +1504,7 @@
         case 'prenom':
           card.innerHTML = `
             <div class="card-content">
-              <div class="step-label">
-                <span>Étape 1/7</span>
-                <span class="step-progress-text">Étape 1 sur 7</span>
-              </div>
+              <div class="step-label">Étape 1/7</div>
               <h2 class="heading">Comment tu t'appelles ?</h2>
               <input type="text" class="input" id="prenomInput" placeholder="Ton prénom" autofocus>
             </div>
@@ -1682,10 +1535,7 @@
         case 'classe':
           card.innerHTML = `
             <div class="card-content">
-              <div class="step-label">
-                <span>Étape 2/7</span>
-                <span class="step-progress-text">Étape 2 sur 7</span>
-              </div>
+              <div class="step-label">Étape 2/7</div>
               <h2 class="heading">Salut ${state.prenom} ! Tu prépares quoi ?</h2>
               <div class="chips-list" id="classeList"></div>
             </div>
@@ -1706,12 +1556,9 @@
         case 'moyenne':
           card.innerHTML = `
             <div class="card-content">
-              <div class="step-label">
-                <span>Étape 3/7</span>
-                <span class="step-progress-text">Étape 3 sur 7</span>
-              </div>
+              <div class="step-label">Étape 3/7</div>
               <h2 class="heading">Quelle est ta moyenne générale à peu près ?</h2>
-              <p class="subtitle">Pas de jugement ! On est là pour t'aider, pas pour te noter 😊</p>
+              <p class="subtitle">Pas besoin d'être précis, une estimation suffit !</p>
               <div class="input-wrapper">
                 <input type="text" inputmode="decimal" class="input" id="moyenneInput" placeholder="Ex: 12.5" autofocus>
                 <span class="input-suffix">/ 20</span>
@@ -1743,10 +1590,7 @@
         case 'matieres_fortes':
           card.innerHTML = `
             <div class="card-content">
-              <div class="step-label">
-                <span>Étape 4/7</span>
-                <span class="step-progress-text">Étape 4 sur 7</span>
-              </div>
+              <div class="step-label">Étape 4/7</div>
               <h2 class="heading">Dans quelles matières tu te sens déjà à l'aise ?</h2>
               <p class="subtitle">Tu peux en sélectionner aucune si tu le souhaites</p>
               <div class="chips-list" id="matieresFortesList"></div>
@@ -1778,12 +1622,9 @@
           const availableSubjects = SUBJECTS.filter(s => !state.matieresFortes.includes(s.key));
           card.innerHTML = `
             <div class="card-content">
-              <div class="step-label">
-                <span>Étape 5/7</span>
-                <span class="step-progress-text">Étape 5 sur 7</span>
-              </div>
-              <h2 class="heading">Et les matières où tu veux progresser ? 🚀</h2>
-              <p class="subtitle">C'est justement là qu'on va te faire décoller !</p>
+              <div class="step-label">Étape 5/7</div>
+              <h2 class="heading">Et celles où tu te sens moins à l'aise ?</h2>
+              <p class="subtitle">C'est justement là qu'on va t'aider le plus !</p>
               <div class="chips-list" id="matieresFaiblesList"></div>
             </div>
             <div class="card-action">
@@ -1815,10 +1656,7 @@
           const options = getObjectifOptions(state.moyenne || 10);
           card.innerHTML = `
             <div class="card-content">
-              <div class="step-label">
-                <span>Étape 6/7</span>
-                <span class="step-progress-text">Étape 6 sur 7</span>
-              </div>
+              <div class="step-label">Étape 6/7</div>
               <h2 class="heading">Quel est ton objectif ?</h2>
               <div style="padding: 12px 16px; border-radius: 14px; background: rgba(29, 185, 84, 0.1); margin-bottom: 16px; font-size: 14px; font-weight: 700; color: var(--primary);">
                 Tu es actuellement à ${state.moyenne}/20 de moyenne
@@ -1849,11 +1687,12 @@
             </div>
           `;
           const messages = [
-            `Ok ${state.prenom}, j'ai compris ton profil !`,
-            'Création de ton quiz personnalisé...',
-            'Analyse de ton niveau...',
-            'Sélection des exercices...',
-            'C\'est parti ! 🚀'
+            `Ok ${state.prenom}, j'ai compris ton profil et tes objectifs !`,
+            'Je suis en train de te créer un quiz personnalisé...',
+            'C\'est un test de niveau qui va me permettre de m\'adapter à 100% à toi.',
+            'Je vais avoir un aperçu de tes lacunes et de tes points forts...',
+            `...et je vais te faire travailler de façon fun et ludique sur les choses dont tu as réellement besoin pour atteindre ${state.objectif}/20.`,
+            'C\'est parti, prépare-toi !'
           ];
           let msgIndex = 0;
           document.getElementById('loadingMsg').textContent = messages[msgIndex];
@@ -1869,7 +1708,7 @@
             } else {
               document.getElementById('loadingMsg').textContent = messages[msgIndex];
             }
-          }, 1500);
+          }, 2200);
           break;
 
         case 'quiz':
@@ -1878,145 +1717,146 @@
 
         case 'recap_app':
           const results = getQuizResults();
-          const matieresToRenforcer = state.matieresFaibles.map(k => SUBJECTS.find(s => s.key === k)?.label || k).join(', ');
           card.innerHTML = `
-            <div class="card-content">
-              <div class="text-center mb-16">
-                <h2 class="heading" style="margin-bottom: 10px; font-size: 20px;">Ok, merci pour tes réponses ! 🎉</h2>
-                <p style="color: var(--text-primary); font-size: 15px; line-height: 1.6; margin: 0 0 6px; font-weight: 600;">
-                  J'y vois un peu plus clair sur ton profil. On va bosser ensemble sur ${matieresToRenforcer} et viser ton objectif de <strong style="color: var(--accent);">${state.objectif}/20</strong>. Honnêtement, je pense que tu vas y arriver.
-                </p>
-              </div>
-              <div class="recap-score">
-                <div class="percent">${results.percent}%</div>
-                <div class="label">${results.correct}/${results.total} bonnes réponses au diagnostic</div>
-              </div>
-              <div class="text-center mb-16" style="margin-top: 24px;">
-                <h3 style="font-size: 18px; font-weight: 900; color: var(--text-primary); margin-bottom: 8px;">Voici ce qui t'attend :</h3>
-              </div>
-              <div class="recap-features">
-                <div class="recap-feature">
-                  <div class="recap-feature-icon">🧠</div>
-                  <div class="recap-feature-text">
-                    <div class="title">Un coach IA qui te connaît</div>
-                    <div class="desc">Je vais m'adapter à ton niveau et te proposer un programme sur mesure</div>
-                  </div>
+            <div class="text-center mb-16">
+              <h2 class="heading" style="margin-bottom: 10px; font-size: 20px;">Ok, merci pour tes réponses ! 🎉</h2>
+              <p style="color: var(--text-primary); font-size: 15px; line-height: 1.6; margin: 0 0 6px; font-weight: 600;">
+                J'y vois un peu plus clair sur ton profil. On va commencer à travailler ensemble et on affinera un peu chaque jour pour atteindre ton objectif de <strong style="color: var(--accent);">${state.objectif}/20</strong>. Honnêtement, je pense que tu vas y arriver.
+              </p>
+            </div>
+            <div class="recap-score">
+              <div class="percent">${results.percent}%</div>
+              <div class="label">${results.correct}/${results.total} bonnes réponses au diagnostic</div>
+            </div>
+            <div class="recap-bullets">
+              <div class="recap-bullet">
+                <div class="icon blue">🎯</div>
+                <div class="text">
+                  <div class="title">100% personnalisé</div>
+                  <div class="desc">C'est moi qui vais te guider en fonction de tes forces et tes lacunes. Pas de contenu générique, tout est adapté à toi.</div>
                 </div>
-                <div class="recap-feature">
-                  <div class="recap-feature-icon">📱</div>
-                  <div class="recap-feature-text">
-                    <div class="title">Des quiz et flashcards adaptés</div>
-                    <div class="desc">Révise de façon ludique avec des exercices qui te font vraiment progresser</div>
-                  </div>
+              </div>
+              <div class="recap-bullet">
+                <div class="icon yellow">😄</div>
+                <div class="text">
+                  <div class="title">Fun et sans stress</div>
+                  <div class="desc">On va apprendre de façon ludique. Tu vas atteindre tes objectifs dans la bonne humeur, sans pression.</div>
                 </div>
-                <div class="recap-feature">
-                  <div class="recap-feature-icon">📊</div>
-                  <div class="recap-feature-text">
-                    <div class="title">Ton tableau de progression</div>
-                    <div class="desc">Suis tes progrès en temps réel et vois les résultats arriver</div>
-                  </div>
-                </div>
-                <div class="recap-feature">
-                  <div class="recap-feature-icon">🔥</div>
-                  <div class="recap-feature-text">
-                    <div class="title">Des rappels intelligents</div>
-                    <div class="desc">On t'aide à garder le rythme sans te spammer</div>
-                  </div>
+              </div>
+              <div class="recap-bullet">
+                <div class="icon green">🧠</div>
+                <div class="text">
+                  <div class="title">Mémoire renforcée</div>
+                  <div class="desc">Ce n'est pas parce que tu es fort quelque part qu'il faut le délaisser. Je reviendrai sur les notions déjà apprises pour ancrer les connaissances.</div>
                 </div>
               </div>
             </div>
-            <div class="card-action">
-              <button class="btn" id="continueBtn">Franchement génial, let's go !</button>
-            </div>
+            <button class="btn" id="continueBtn">Franchement génial, let's go !</button>
           `;
           document.getElementById('continueBtn').addEventListener('click', goNext);
           break;
 
         case 'email':
           card.innerHTML = `
-            <div class="card-content">
-              <div class="text-center mb-16">
-                <div style="font-size: 40px; margin-bottom: 10px;">😊</div>
-                <h2 class="heading" style="margin-bottom: 8px; font-size: 20px;">Content que ça te plaise :)</h2>
-                <p class="subtitle">Avant qu'on continue j'ai besoin que tu crées un compte pour sauvegarder ta progression. Tu veux utiliser quelle adresse mail ?</p>
-              </div>
-              <input type="email" class="input" id="emailInput" placeholder="ton.email@exemple.com" autofocus>
+            <div class="text-center mb-16">
+              <div style="font-size: 40px; margin-bottom: 10px;">😊</div>
+              <h2 class="heading" style="margin-bottom: 8px; font-size: 20px;">Content que ça te plaise :)</h2>
+              <p class="subtitle">Avant qu'on continue j'ai besoin que tu crées un compte pour sauvegarder ta progression. Tu veux utiliser quelle adresse mail ?</p>
             </div>
-            <div class="card-action">
-              <button class="btn" id="continueBtn" disabled>Continuer</button>
-            </div>
+            <input type="email" class="input" id="emailInput" placeholder="ton.email@exemple.com" autofocus>
+            <button class="btn" id="continueBtn" disabled>Continuer</button>
           `;
           const emailInput = document.getElementById('emailInput');
           const continueEmailBtn = document.getElementById('continueBtn');
           emailInput.value = state.email;
-          
-          function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-          }
-          
           emailInput.addEventListener('input', (e) => {
             state.email = e.target.value.trim();
-            continueEmailBtn.disabled = !isValidEmail(state.email);
+            continueEmailBtn.disabled = !state.email.includes('@');
           });
           emailInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && isValidEmail(state.email)) goNext();
+            if (e.key === 'Enter' && state.email.includes('@')) goNext();
           });
           continueEmailBtn.addEventListener('click', goNext);
-          if (isValidEmail(state.email)) continueEmailBtn.disabled = false;
+          if (state.email.includes('@')) continueEmailBtn.disabled = false;
           break;
 
         case 'password':
           card.innerHTML = `
-            <div class="card-content">
-              <div class="text-center mb-16">
-                <h2 class="heading" style="margin-bottom: 8px; font-size: 20px;">C'est tout bon !</h2>
-                <p class="subtitle">Crée-toi un mot de passe, comme "Objectifbrevet" ou "Monchiencestlemeilleur", bref on te laisse choisir :)</p>
-              </div>
-              <input type="password" class="input" id="passwordInput" placeholder="Ton mot de passe (6 caractères min.)" autofocus>
-              <div id="passwordStrength" style="margin-top: 8px; font-size: 13px; font-weight: 700; text-align: center;"></div>
-              <p class="text-center" style="font-size: 11px; color: var(--text-muted); margin-top: 12px;">En créant ton compte, tu acceptes nos conditions d'utilisation.</p>
+            <div class="text-center mb-16">
+              <h2 class="heading" style="margin-bottom: 8px; font-size: 20px;">C'est tout bon !</h2>
+              <p class="subtitle">Crée-toi un mot de passe, comme "Objectifbrevet" ou "Monchiencestlemeilleur", bref on te laisse choisir :)</p>
             </div>
-            <div class="card-action">
-              <button class="btn" id="continueBtn" disabled>C'est bon j'ai choisi !</button>
-            </div>
+            <input type="password" class="input" id="passwordInput" placeholder="Ton mot de passe (6 caractères min.)" autofocus>
+            <button class="btn" id="continueBtn" disabled>C'est bon j'ai choisi !</button>
+            <p class="text-center" style="font-size: 11px; color: var(--text-muted); margin-top: 12px;">En créant ton compte, tu acceptes nos conditions d'utilisation.</p>
           `;
           const passwordInput = document.getElementById('passwordInput');
           const continuePasswordBtn = document.getElementById('continueBtn');
-          const passwordStrength = document.getElementById('passwordStrength');
           passwordInput.value = state.password;
-          
-          function updatePasswordStrength(password) {
-            if (password.length === 0) {
-              passwordStrength.textContent = '';
-              return;
-            }
-            if (password.length < 6) {
-              passwordStrength.textContent = '❌ Trop court';
-              passwordStrength.style.color = 'var(--red)';
-            } else if (password.length < 10) {
-              passwordStrength.textContent = '✅ Correct';
-              passwordStrength.style.color = 'var(--green)';
-            } else {
-              passwordStrength.textContent = '💪 Excellent !';
-              passwordStrength.style.color = 'var(--accent)';
-            }
-          }
-          
           passwordInput.addEventListener('input', (e) => {
             state.password = e.target.value;
-            updatePasswordStrength(state.password);
             continuePasswordBtn.disabled = state.password.length < 6;
           });
           passwordInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && state.password.length >= 6) goNext();
           });
           continuePasswordBtn.addEventListener('click', goNext);
-          updatePasswordStrength(state.password);
           if (state.password.length >= 6) continuePasswordBtn.disabled = false;
           break;
 
         case 'loading_profile':
-          renderLoadingProfile();
+          card.innerHTML = `
+            <div class="profile-loading-container">
+              <div class="circular-progress">
+                <div class="circle" id="progressCircle">
+                  <div class="circle-inner" id="progressPercent">0%</div>
+                </div>
+              </div>
+              <div class="profile-messages" id="profileMessages"></div>
+            </div>
+          `;
+          const profileMessages = [
+            'Création de ton profil personnalisé...',
+            `${state.prenom}, ${state.classe} — Moyenne : ${state.moyenne}/20`,
+            `Objectif : ${state.objectif}/20`,
+            `Points forts : ${state.matieresFortes.map(k => SUBJECTS.find(s => s.key === k)?.label || k).join(', ') || 'aucun'}`,
+            `Lacunes identifiées : ${state.matieresFaibles.map(k => SUBJECTS.find(s => s.key === k)?.label || k).join(', ')}`,
+            'Génération de ton programme de révision...',
+            'C\'est prêt ! Bienvenue dans ton espace !'
+          ];
+          let progress = 0;
+          let msgIdx = 0;
+          const messagesDiv = document.getElementById('profileMessages');
+          const progressCircle = document.getElementById('progressCircle');
+          const progressPercent = document.getElementById('progressPercent');
+
+          function addMessage(msg, active = false, success = false) {
+            const div = document.createElement('div');
+            div.className = 'profile-message' + (active ? ' active' : ' done') + (success ? ' success' : '');
+            div.textContent = msg;
+            messagesDiv.appendChild(div);
+          }
+
+          addMessage(profileMessages[msgIdx], true);
+
+          const progressInterval = setInterval(() => {
+            progress++;
+            progressPercent.textContent = progress + '%';
+            progressCircle.style.background = `conic-gradient(var(--accent) ${progress * 3.6}deg, var(--border-subtle) 0deg)`;
+            if (progress >= 100) clearInterval(progressInterval);
+          }, 105);
+
+          const msgInterval = setInterval(() => {
+            messagesDiv.children[msgIdx].classList.remove('active');
+            messagesDiv.children[msgIdx].classList.add('done');
+            msgIdx++;
+            if (msgIdx >= profileMessages.length) {
+              clearInterval(msgInterval);
+              setTimeout(goNext, 1500);
+            } else {
+              addMessage(profileMessages[msgIdx], true, msgIdx === profileMessages.length - 1);
+            }
+          }, 1500);
           break;
 
         case 'paywall':
@@ -2033,26 +1873,24 @@
     let showCorrection = false;
 
     function renderQuiz() {
-      if (currentQuizIndex >= state.quizQuestions.length) {
+      if (currentQuizIndex >= QUIZ_QUESTIONS.length) {
         goNext();
         return;
       }
 
-      const q = state.quizQuestions[currentQuizIndex];
+      const q = QUIZ_QUESTIONS[currentQuizIndex];
       const card = document.getElementById('card');
 
       card.innerHTML = `
-        <div class="card-content">
-          <div class="quiz-header">
-            <div class="step-label" style="margin-bottom: 0;">Question ${currentQuizIndex + 1}/${state.quizQuestions.length}</div>
-            <div class="quiz-badge">${q.subject}</div>
-          </div>
-          <h2 class="heading" style="font-size: 17px;">${q.prompt}</h2>
-          <div class="quiz-choices" id="quizChoices"></div>
-          <div id="quizExplanation"></div>
-          <div class="quiz-progress">
-            <div class="quiz-progress-fill" style="width: ${((currentQuizIndex + 1) / state.quizQuestions.length) * 100}%;"></div>
-          </div>
+        <div class="quiz-header">
+          <div class="step-label" style="margin-bottom: 0;">Question ${currentQuizIndex + 1}/${QUIZ_QUESTIONS.length}</div>
+          <div class="quiz-badge">${q.subject}</div>
+        </div>
+        <h2 class="heading" style="font-size: 17px;">${q.prompt}</h2>
+        <div class="quiz-choices" id="quizChoices"></div>
+        <div id="quizExplanation"></div>
+        <div class="quiz-progress">
+          <div class="quiz-progress-fill" style="width: ${((currentQuizIndex + 1) / QUIZ_QUESTIONS.length) * 100}%;"></div>
         </div>
       `;
 
@@ -2084,7 +1922,7 @@
               selectedAnswer = null;
               currentQuizIndex++;
               renderQuiz();
-            }, 2400);
+            }, 1800);
           });
         }
 
@@ -2100,202 +1938,102 @@
     }
 
     // ========================================
-    // LOADING PROFILE
-    // ========================================
-    function renderLoadingProfile() {
-      const card = document.getElementById('card');
-      
-      card.innerHTML = `
-        <div class="card-content">
-          <div class="profile-loading-container">
-            <div class="circular-progress">
-              <svg viewBox="0 0 120 120">
-                <circle class="circle-bg" cx="60" cy="60" r="52"></circle>
-                <circle class="circle-progress" cx="60" cy="60" r="52" id="progressCircle" 
-                  stroke-dasharray="327" stroke-dashoffset="327"></circle>
-                <text x="60" y="70" text-anchor="middle" class="percent-text" id="progressPercent">0%</text>
-              </svg>
-            </div>
-            <div class="loading-phase" id="loadingPhase"></div>
-            <div class="profile-results" id="profileResults"></div>
-          </div>
-        </div>
-      `;
-
-      const phases = [
-        { range: [0, 15], text: 'Analyse de tes réponses...', icon: '🔍' },
-        { range: [15, 30], text: 'Identification de tes lacunes...', icon: '📊' },
-        { range: [30, 45], text: 'Évaluation de ton niveau par matière...', icon: '📐' },
-        { range: [45, 60], text: 'Calcul de ton potentiel de progression...', icon: '📈' },
-        { range: [60, 75], text: 'Création de ton programme personnalisé...', icon: '🧠' },
-        { range: [75, 90], text: 'Sélection des exercices adaptés...', icon: '✨' },
-        { range: [90, 100], text: 'Finalisation de ton espace...', icon: '✅' }
-      ];
-
-      const userSubjects = state.matieresFaibles.length > 0 
-        ? state.matieresFaibles.map(k => SUBJECTS.find(s => s.key === k)?.label || k)
-        : ['Mathématiques', 'Français', 'Histoire-Géo'];
-
-      const fakeResults = [];
-      userSubjects.forEach((subject, i) => {
-        const baseLevel = 50 + Math.floor(Math.random() * 20);
-        const potential = baseLevel + 15 + Math.floor(Math.random() * 10);
-        fakeResults.push({
-          text: `${subject} : Niveau ${baseLevel}% → Potentiel ${potential}%`,
-          delay: (i + 1) * 1100
-        });
-      });
-
-      let progress = 0;
-      let currentPhaseIndex = 0;
-      const progressCircle = document.getElementById('progressCircle');
-      const progressPercent = document.getElementById('progressPercent');
-      const loadingPhase = document.getElementById('loadingPhase');
-      const profileResults = document.getElementById('profileResults');
-
-      function updatePhase() {
-        const phase = phases[currentPhaseIndex];
-        if (phase) {
-          loadingPhase.innerHTML = `<span class="icon">${phase.icon}</span>${phase.text}`;
-        }
-      }
-
-      updatePhase();
-
-      const totalDuration = 7500;
-      const intervalMs = 75;
-      const steps = totalDuration / intervalMs;
-      const progressPerStep = 100 / steps;
-
-      const progressInterval = setInterval(() => {
-        progress += progressPerStep;
-        if (progress > 100) progress = 100;
-
-        const percent = Math.floor(progress);
-        progressPercent.textContent = percent + '%';
-        const circumference = 327;
-        const offset = circumference - (progress / 100) * circumference;
-        progressCircle.style.strokeDashoffset = offset;
-
-        // Changer de phase
-        for (let i = 0; i < phases.length; i++) {
-          if (progress >= phases[i].range[0] && progress < phases[i].range[1]) {
-            if (currentPhaseIndex !== i) {
-              currentPhaseIndex = i;
-              updatePhase();
-            }
-            break;
-          }
-        }
-
-        if (progress >= 100) {
-          clearInterval(progressInterval);
-          setTimeout(goNext, 1000);
-        }
-      }, intervalMs);
-
-      // Afficher les faux résultats
-      fakeResults.forEach((result, idx) => {
-        setTimeout(() => {
-          const div = document.createElement('div');
-          div.className = 'profile-result';
-          div.innerHTML = `<span>${result.text}</span><span class="check">✓</span>`;
-          profileResults.appendChild(div);
-          // Auto-scroll
-          profileResults.scrollTop = profileResults.scrollHeight;
-        }, result.delay);
-      });
-    }
-
-    // ========================================
     // PAYWALL
     // ========================================
     function renderPaywall() {
       const card = document.getElementById('card');
 
-      // Places restantes (80-200)
+      // Timer countdown (72h)
+      const timerKey = 'bravoo_paywall_timer';
+      let endTime = localStorage.getItem(timerKey);
+      if (!endTime) {
+        endTime = Date.now() + 72 * 60 * 60 * 1000;
+        localStorage.setItem(timerKey, endTime);
+      }
+
+      // Places restantes (7-23)
       const placesKey = 'bravoo_paywall_places';
       let places = localStorage.getItem(placesKey);
       if (!places) {
-        places = Math.floor(Math.random() * 121) + 80; // 80-200
+        places = Math.floor(Math.random() * 17) + 7;
         localStorage.setItem(placesKey, places);
       }
 
-      const classeLabel = CLASSES.find(c => c.value === state.classe)?.label || state.classe;
-      const matieresToRenforcer = state.matieresFaibles.map(k => SUBJECTS.find(s => s.key === k)?.label || k).join(', ');
-
       card.innerHTML = `
-        <div class="card-content">
-          <div class="paywall-hero">
-            <div class="emoji">🎉</div>
-            <h2 class="title">${state.prenom}, ton espace est prêt !</h2>
-          </div>
-
-          <div class="paywall-summary">
-            <div class="paywall-summary-row">
-              <span class="key">Classe/Situation</span>
-              <span class="value">${classeLabel}</span>
-            </div>
-            <div class="paywall-summary-row">
-              <span class="key">Score au quiz</span>
-              <span class="value">${getQuizResults().correct}/${getQuizResults().total}</span>
-            </div>
-            <div class="paywall-summary-row">
-              <span class="key">Matières à renforcer</span>
-              <span class="value">${matieresToRenforcer}</span>
-            </div>
-            <div class="paywall-summary-row">
-              <span class="key">Programme</span>
-              <span class="value">12 semaines</span>
-            </div>
-            <div class="paywall-summary-row">
-              <span class="key">Exercices adaptés</span>
-              <span class="value">287</span>
-            </div>
-            <div class="paywall-summary-row">
-              <span class="key">Coaching IA</span>
-              <span class="value">Illimité 24/7</span>
-            </div>
-          </div>
-
-          <div class="paywall-stars">★★★★★</div>
-          <div class="paywall-rating">4.9/5 — 1 200+ avis</div>
-
-          <div class="paywall-testimonial">
-            "J'étais à 11 de moyenne en maths, j'ai eu 16 au brevet grâce aux quiz de Bravoo !"
-            <div class="author">— Léa, 15 ans, Toulouse</div>
-          </div>
-
-          <div class="paywall-offer">
-            <div class="paywall-badge">🔥 OFFRE LIMITÉE</div>
-            <div class="paywall-places">
-              Plus que <strong>${places} places</strong> disponibles ce mois-ci
-            </div>
-            <div class="paywall-pricing">
-              <div class="paywall-old-price">12,99€/semaine</div>
-              <div class="paywall-new-price">3,99€</div>
-              <div class="paywall-period">/semaine</div>
-              <div class="paywall-discount">-70%</div>
-            </div>
-            <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 12px; font-weight: 600;">
-              🎯 Moins cher qu'1 heure de cours particulier (30-50€)
-            </p>
-          </div>
+        <div class="paywall-hero">
+          <div class="emoji">🎉</div>
+          <h2 class="title">${state.prenom}, ton espace est prêt !</h2>
+          <p class="subtitle">On a hâte de t'accompagner vers la réussite !</p>
         </div>
 
-        <div class="card-action">
-          <button class="paywall-cta" id="paywallCta">Commencer mon programme maintenant 🚀</button>
-          <div class="paywall-guarantee">
-            <span class="paywall-guarantee-item">✅ Garantie 30 jours</span>
-            <span class="paywall-guarantee-item">🔒 Paiement sécurisé</span>
-            <span class="paywall-guarantee-item">🔄 Sans engagement</span>
-          </div>
+        <div class="paywall-summary">
+          <strong>${state.prenom}</strong> • ${state.classe} • Moyenne actuelle : <strong>${state.moyenne}/20</strong><br>
+          Objectif : <strong>${state.objectif}/20</strong><br>
+          Matières à renforcer : <strong>${state.matieresFaibles.map(k => SUBJECTS.find(s => s.key === k)?.label || k).join(', ')}</strong>
+        </div>
+
+        <div class="paywall-features">
+          <div class="paywall-feature"><span class="icon">✅</span>287 exercices adaptés à ton profil</div>
+          <div class="paywall-feature"><span class="icon">🤖</span>Coaching IA illimité</div>
+          <div class="paywall-feature"><span class="icon">📊</span>Suivi de progression en temps réel</div>
+          <div class="paywall-feature"><span class="icon">🏆</span>Plan personnalisé pour atteindre ${state.objectif}/20</div>
+        </div>
+
+        <div class="paywall-stars">★★★★★</div>
+
+        <div class="text-center">
+          <div class="paywall-badge">🔥 OFFRE LIMITÉE</div>
+        </div>
+
+        <div class="paywall-places">
+          Plus que <strong>${places} places</strong> disponibles cette semaine
+        </div>
+
+        <div class="paywall-pricing">
+          <div class="paywall-old-price">12,99€/semaine</div>
+          <div class="paywall-new-price">3,99€</div>
+          <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">/semaine</div>
+          <div class="paywall-discount">-70%</div>
+        </div>
+
+        <div class="paywall-timer">
+          L'offre expire dans <div class="time" id="countdown">72:00:00</div>
+        </div>
+
+        <div class="paywall-testimonial">
+          "J'ai eu mon brevet mention bien grâce à Bravoo !"
+          <div class="author">— Léa, 15 ans</div>
+        </div>
+
+        <button class="paywall-cta" id="paywallCta">Accéder à mon programme →</button>
+
+        <div class="paywall-guarantee">
+          <span class="icon">✓</span> Garantie 30 jours satisfait ou remboursé<br>
+          <span class="icon">🔒</span> Paiement 100% sécurisé<br>
+          <span class="icon">🚫</span> Sans engagement, résilie quand tu veux
         </div>
       `;
 
+      // Countdown timer
+      function updateCountdown() {
+        const now = Date.now();
+        const remaining = endTime - now;
+        if (remaining <= 0) {
+          document.getElementById('countdown').textContent = '00:00:00';
+          return;
+        }
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+        document.getElementById('countdown').textContent = 
+          `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+
       // CTA
       document.getElementById('paywallCta').addEventListener('click', () => {
-        alert('Le paiement sera disponible très bientôt ! Merci de ta patience 🙏');
+        alert('Paiement en cours de configuration');
       });
     }
 
@@ -2333,8 +2071,8 @@
 
     function getQuizResults() {
       let correct = 0;
-      const total = state.quizQuestions.length;
-      state.quizQuestions.forEach(q => {
+      const total = QUIZ_QUESTIONS.length;
+      QUIZ_QUESTIONS.forEach(q => {
         if (state.quizAnswers[q.id] === q.correctAnswerIndex) correct++;
       });
       return { correct, total, percent: Math.round((correct / total) * 100) };
