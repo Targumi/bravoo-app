@@ -9,6 +9,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
+        /* ========== PALETTE BRAVOO COHÉRENTE ========== */
+        :root {
+            --primary: #1DB954;
+            --primary-light: #1ED760;
+            --accent: #F5C518;
+            --bg-page: #121212;
+            --bg-surface: #181818;
+            --bg-surface-hover: #282828;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-radius-card: 12px;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -17,11 +31,63 @@
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #121212;
-            color: #fff;
+            background: var(--bg-page);
+            color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
         }
+        
+        /* ========== PARTICULES FLOTTANTES BACKGROUND ========== */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 8px rgba(29, 185, 84, 0.6);
+            animation: particleFloat 12s ease-in-out infinite;
+        }
+        
+        @keyframes particleFloat {
+            0% {
+                transform: translate(0, 100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translate(var(--tx), -100px) scale(1);
+                opacity: 0;
+            }
+        }
+        
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; --tx: 20px; }
+        .particle:nth-child(2) { left: 20%; animation-delay: 1.5s; --tx: -30px; }
+        .particle:nth-child(3) { left: 30%; animation-delay: 3s; --tx: 40px; }
+        .particle:nth-child(4) { left: 40%; animation-delay: 4.5s; --tx: -20px; }
+        .particle:nth-child(5) { left: 50%; animation-delay: 6s; --tx: 30px; }
+        .particle:nth-child(6) { left: 60%; animation-delay: 7.5s; --tx: -40px; }
+        .particle:nth-child(7) { left: 70%; animation-delay: 9s; --tx: 25px; }
+        .particle:nth-child(8) { left: 80%; animation-delay: 10.5s; --tx: -35px; }
+        .particle:nth-child(9) { left: 15%; animation-delay: 2s; --tx: 15px; }
+        .particle:nth-child(10) { left: 85%; animation-delay: 8s; --tx: -25px; }
         
         .container {
             max-width: 600px;
@@ -30,27 +96,36 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            position: relative;
+            z-index: 1;
         }
         
-        /* Progress bar */
+        /* ========== PROGRESS BAR SHIMMER ========== */
         .progress-bar {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 4px;
-            background: #181818;
+            background: var(--bg-surface);
             z-index: 1000;
         }
         
         .progress-fill {
             height: 100%;
-            background: #1DB954;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
+            background-size: 200% 100%;
             transition: width 0.4s ease-out;
             width: 0%;
+            animation: shimmerProgress 2s linear infinite;
         }
         
-        /* Logo */
+        @keyframes shimmerProgress {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        
+        /* ========== LOGO AVEC ÉTOILE ========== */
         .logo {
             text-align: center;
             font-size: 36px;
@@ -60,19 +135,32 @@
         }
         
         .logo .brav {
-            color: #fff;
+            color: var(--text-primary);
         }
         
         .logo .oo {
-            color: #1DB954;
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
         }
         
-        /* Steps container */
+        /* ÉTOILE DORÉE ★ (cohérence avec le site) */
+        .logo .oo::after {
+            content: '★';
+            position: absolute;
+            top: -12px;
+            right: -8px;
+            font-size: 14px;
+            color: var(--accent);
+            filter: drop-shadow(0 0 4px rgba(245, 197, 24, 0.5));
+        }
+        
+        /* ========== STEPS ========== */
         .step {
             display: none;
             flex-direction: column;
             flex: 1;
-            animation: slideIn 0.4s ease-out;
+            animation: slideIn 0.5s ease-out;
         }
         
         .step.active {
@@ -80,17 +168,19 @@
         }
         
         .step.slide-out {
-            animation: slideOut 0.4s ease-out;
+            animation: slideOut 0.5s ease-out;
         }
         
         @keyframes slideIn {
             from {
                 opacity: 0;
                 transform: translateX(100%);
+                filter: blur(10px);
             }
             to {
                 opacity: 1;
                 transform: translateX(0);
+                filter: blur(0);
             }
         }
         
@@ -98,10 +188,12 @@
             from {
                 opacity: 1;
                 transform: translateX(0);
+                filter: blur(0);
             }
             to {
                 opacity: 0;
                 transform: translateX(-100%);
+                filter: blur(10px);
             }
         }
         
@@ -115,14 +207,54 @@
             100% { background-position: 200% center; }
         }
         
-        @keyframes flipIn {
-            from {
+        @keyframes bounceIn {
+            0% {
                 opacity: 0;
-                transform: rotateX(-90deg);
+                transform: scale(0.3) translateY(-20px);
             }
-            to {
+            50% {
                 opacity: 1;
-                transform: rotateX(0);
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes glowPulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(29, 185, 84, 0.4), 0 0 40px rgba(29, 185, 84, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(29, 185, 84, 0.6), 0 0 60px rgba(29, 185, 84, 0.3);
+            }
+        }
+        
+        /* ========== CONFETTIS CSS ========== */
+        .confetti {
+            position: fixed;
+            top: -10px;
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            opacity: 0;
+            animation: confettiFall 2s ease-out forwards;
+            z-index: 9999;
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(720deg);
             }
         }
         
@@ -144,11 +276,11 @@
         p {
             font-size: 16px;
             line-height: 1.6;
-            color: #b3b3b3;
+            color: var(--text-secondary);
             margin-bottom: 16px;
         }
         
-        /* Input */
+        /* ========== INPUT AVEC GLOW VERT AU FOCUS ========== */
         .input-group {
             margin-bottom: 24px;
         }
@@ -156,10 +288,10 @@
         input {
             width: 100%;
             padding: 16px 20px;
-            background: #181818;
-            border: 2px solid #282828;
-            border-radius: 12px;
-            color: #fff;
+            background: var(--bg-surface);
+            border: 2px solid var(--border-subtle);
+            border-radius: var(--border-radius-card);
+            color: var(--text-primary);
             font-size: 16px;
             font-family: 'Plus Jakarta Sans', sans-serif;
             transition: all 0.3s;
@@ -167,21 +299,22 @@
         
         input:focus {
             outline: none;
-            border-color: #1DB954;
+            border-color: var(--primary);
             background: #1a1a1a;
+            box-shadow: 0 0 20px rgba(29, 185, 84, 0.4), 0 0 40px rgba(29, 185, 84, 0.2);
         }
         
         input::placeholder {
             color: #666;
         }
         
-        /* Button */
+        /* ========== BUTTON ========== */
         .btn {
             width: 100%;
             padding: 18px;
-            background: #1DB954;
+            background: var(--primary);
             border: none;
-            border-radius: 12px;
+            border-radius: var(--border-radius-card);
             color: #000;
             font-size: 17px;
             font-weight: 700;
@@ -192,7 +325,7 @@
         }
         
         .btn:hover {
-            background: #1ed760;
+            background: var(--primary-light);
             transform: scale(1.02);
         }
         
@@ -201,13 +334,19 @@
         }
         
         .btn:disabled {
-            background: #282828;
+            background: var(--bg-surface-hover);
             color: #666;
             cursor: not-allowed;
             transform: none;
         }
         
-        /* Cards grid */
+        .btn.btn-paywall {
+            animation: glowPulse 2s infinite;
+            font-size: 18px;
+            font-weight: 800;
+        }
+        
+        /* ========== CARDS GRID ========== */
         .cards-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -222,25 +361,38 @@
         }
         
         .card {
-            background: #181818;
-            border: 2px solid #282828;
-            border-radius: 12px;
+            background: var(--bg-surface);
+            border: 2px solid var(--border-subtle);
+            border-radius: var(--border-radius-card);
             padding: 20px 12px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
             font-size: 14px;
             font-weight: 600;
+            opacity: 0;
+            animation: bounceIn 0.6s ease-out forwards;
         }
         
+        .card:nth-child(1) { animation-delay: 0s; }
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.2s; }
+        .card:nth-child(4) { animation-delay: 0.3s; }
+        .card:nth-child(5) { animation-delay: 0.4s; }
+        .card:nth-child(6) { animation-delay: 0.5s; }
+        .card:nth-child(7) { animation-delay: 0.6s; }
+        .card:nth-child(8) { animation-delay: 0.7s; }
+        
         .card:hover {
-            border-color: #1DB954;
+            border-color: var(--primary);
             background: #1a1a1a;
+            transform: translateY(-4px);
         }
         
         .card.selected {
-            border-color: #1DB954;
+            border-color: var(--primary);
             background: rgba(29, 185, 84, 0.1);
+            animation: glowPulse 1.5s infinite;
         }
         
         .card .emoji {
@@ -248,7 +400,7 @@
             margin-bottom: 8px;
         }
         
-        /* Options list */
+        /* ========== OPTIONS LIST ========== */
         .options-list {
             display: flex;
             flex-direction: column;
@@ -257,9 +409,9 @@
         }
         
         .option {
-            background: #181818;
-            border: 2px solid #282828;
-            border-radius: 12px;
+            background: var(--bg-surface);
+            border: 2px solid var(--border-subtle);
+            border-radius: var(--border-radius-card);
             padding: 20px;
             cursor: pointer;
             transition: all 0.3s;
@@ -269,18 +421,18 @@
         }
         
         .option:hover {
-            border-color: #1DB954;
+            border-color: var(--primary);
             background: #1a1a1a;
         }
         
         .option.selected {
-            border-color: #1DB954;
+            border-color: var(--primary);
             background: rgba(29, 185, 84, 0.1);
         }
         
-        /* Shimmer text */
-        .shimmer {
-            background: linear-gradient(90deg, #fff 0%, #1DB954 50%, #fff 100%);
+        /* ========== SHIMMER DORÉ (Étape 2) ========== */
+        .shimmer-gold {
+            background: linear-gradient(90deg, var(--text-primary) 0%, var(--accent) 50%, var(--text-primary) 100%);
             background-size: 200% auto;
             background-clip: text;
             -webkit-background-clip: text;
@@ -288,7 +440,7 @@
             animation: shimmer 2s linear infinite;
         }
         
-        /* Loading animation */
+        /* ========== LOADING ANIMATION ========== */
         .loading-container {
             display: flex;
             flex-direction: column;
@@ -315,11 +467,11 @@
         }
         
         .progress-bg {
-            stroke: #282828;
+            stroke: var(--bg-surface-hover);
         }
         
         .progress-bar-circle {
-            stroke: #1DB954;
+            stroke: var(--primary);
             stroke-linecap: round;
             transition: stroke-dashoffset 0.3s ease;
         }
@@ -331,35 +483,50 @@
             transform: translate(-50%, -50%);
             font-size: 48px;
             font-weight: 800;
-            color: #1DB954;
+            color: var(--primary);
         }
         
         .loading-message {
             font-size: 18px;
             font-weight: 600;
-            color: #fff;
+            color: var(--text-primary);
             min-height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
+            gap: 12px;
         }
         
         .loading-message span {
             animation: fadeIn 0.5s ease;
         }
         
-        /* Paywall */
+        .loading-icon {
+            font-size: 48px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        /* ========== PAYWALL ========== */
+        .stars-row {
+            text-align: center;
+            font-size: 28px;
+            color: var(--accent);
+            margin-bottom: 16px;
+            animation: fadeIn 0.8s ease;
+        }
+        
         .summary-card {
-            background: #181818;
+            background: var(--bg-surface);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 24px;
-            border: 1px solid #282828;
+            border: 1px solid var(--border-subtle);
         }
         
         .summary-item {
             padding: 12px 0;
-            border-bottom: 1px solid #282828;
+            border-bottom: 1px solid var(--border-subtle);
             font-size: 15px;
         }
         
@@ -368,13 +535,13 @@
         }
         
         .summary-item strong {
-            color: #1DB954;
+            color: var(--primary);
             font-weight: 700;
         }
         
         .promo-badge {
             background: #dc2626;
-            color: #fff;
+            color: var(--text-primary);
             padding: 8px 16px;
             border-radius: 8px;
             font-weight: 700;
@@ -384,36 +551,50 @@
             animation: pulse 2s infinite;
         }
         
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
         .price-container {
             background: #0a0a0a;
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 24px;
             text-align: center;
-            border: 2px solid #1DB954;
+            border: 2px solid var(--primary);
         }
         
         .old-price {
-            text-decoration: line-through;
-            color: #666;
-            font-size: 20px;
+            color: #dc2626;
+            font-size: 24px;
             margin-bottom: 8px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        /* LIGNE ROUGE ANIMÉE QUI BARRE LE PRIX */
+        .old-price::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: #dc2626;
+            transform: translateY(-50%);
+            animation: strikethrough 0.8s 0.5s ease-out forwards;
+        }
+        
+        @keyframes strikethrough {
+            to { width: 100%; }
         }
         
         .new-price {
             font-size: 48px;
             font-weight: 800;
-            color: #1DB954;
+            color: var(--primary);
             margin-bottom: 8px;
+            animation: pulse 2s infinite;
         }
         
         .discount-badge {
-            background: #1DB954;
+            background: var(--primary);
             color: #000;
             padding: 6px 12px;
             border-radius: 6px;
@@ -428,18 +609,48 @@
             color: #dc2626;
             font-weight: 700;
             margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .timer.urgent {
+            background: rgba(220, 38, 38, 0.1);
+            animation: pulse 1.5s infinite;
         }
         
         .spots-left {
             font-size: 14px;
-            color: #F5C518;
+            color: var(--accent);
             font-weight: 600;
             margin-top: 8px;
         }
         
+        .testimonial-box {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-subtle);
+            font-style: italic;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+        
+        .testimonial-box .stars {
+            color: var(--accent);
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .testimonial-author {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #666;
+        }
+        
         .guarantee {
             text-align: center;
-            color: #b3b3b3;
+            color: var(--text-secondary);
             font-size: 14px;
             margin-top: 16px;
             margin-bottom: 12px;
@@ -461,14 +672,33 @@
             margin-top: 16px;
         }
         
-        .success-check {
-            font-size: 64px;
-            margin-bottom: 20px;
-            animation: fadeIn 0.5s ease;
+        /* ========== MOBILE RESPONSIVE ========== */
+        @media (max-width: 480px) {
+            h1 { font-size: 24px; }
+            h2 { font-size: 20px; }
+            .logo { font-size: 32px; margin: 30px 0 50px 0; }
+            .new-price { font-size: 40px; }
+            .progress-circle { width: 160px; height: 160px; }
+            .progress-text { font-size: 36px; }
+            .cards-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+    <!-- Particules flottantes en background -->
+    <div class="particles" id="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
     <div class="progress-bar">
         <div class="progress-fill" id="progressFill"></div>
     </div>
@@ -487,15 +717,15 @@
             <button class="btn" onclick="goToStep(2)">Continuer →</button>
         </div>
         
-        <!-- Step 2: Accueil personnalisé -->
+        <!-- Step 2: Accueil personnalisé avec shimmer doré + confettis -->
         <div class="step" id="step2">
-            <h1 class="shimmer">Salut <span id="nameDisplay"></span> ! 👋</h1>
+            <h1>Salut <span class="shimmer-gold" id="nameDisplay"></span> ! 👋</h1>
             <p>Je vais analyser ton profil et te créer un programme 100% personnalisé.</p>
             <p>Tu es prêt(e) ?</p>
             <button class="btn" onclick="goToStep(3)">C'est parti ! →</button>
         </div>
         
-        <!-- Step 3: Situation -->
+        <!-- Step 3: Situation (cartes avec bounce + glow) -->
         <div class="step" id="step3">
             <h2>Tu prépares quoi ?</h2>
             <div class="cards-grid" id="situationCards">
@@ -585,7 +815,7 @@
             <button class="btn" onclick="goToStep(7)">Créer mon compte →</button>
         </div>
         
-        <!-- Step 7: Loading -->
+        <!-- Step 7: Loading avec icônes par phase -->
         <div class="step" id="step7">
             <div class="loading-container">
                 <div class="progress-circle">
@@ -597,13 +827,15 @@
                     <div class="progress-text" id="progressPercent">0%</div>
                 </div>
                 <div class="loading-message" id="loadingMessage">
-                    <span>Analyse de ton profil...</span>
+                    <div class="loading-icon" id="loadingIcon"></div>
+                    <span id="loadingText">Analyse de ton profil...</span>
                 </div>
             </div>
         </div>
         
-        <!-- Step 8: Paywall -->
+        <!-- Step 8: Paywall AMÉLIORÉ -->
         <div class="step" id="step8">
+            <div class="stars-row">★★★★★</div>
             <h1>🎉 <span id="nameDisplay3"></span>, ton programme est prêt !</h1>
             
             <div class="summary-card">
@@ -615,6 +847,12 @@
                 <div class="summary-item"><strong>Coaching IA illimité</strong></div>
             </div>
             
+            <div class="testimonial-box">
+                <div class="stars">★★★★★</div>
+                <p>"J'ai eu mon brevet mention bien grâce à Bravoo !"</p>
+                <div class="testimonial-author">— Léa, 15 ans</div>
+            </div>
+            
             <div class="promo-badge">🔥 OFFRE LIMITÉE</div>
             
             <div class="price-container">
@@ -622,10 +860,10 @@
                 <div class="old-price">12,99€/semaine</div>
                 <div class="discount-badge">-70%</div>
                 <div class="new-price">3,99€/semaine</div>
-                <div class="timer">⏱️ Offre expire dans <span id="countdown"></span></div>
+                <div class="timer" id="timer">⏱️ Offre expire dans <span id="countdown"></span></div>
             </div>
             
-            <button class="btn" onclick="handlePayment()">Accéder à mon programme →</button>
+            <button class="btn btn-paywall" onclick="handlePayment()">Accéder à mon programme →</button>
             
             <div class="guarantee">✅ Garantie satisfait ou remboursé 30 jours</div>
             <div class="trust-icons">
@@ -677,6 +915,9 @@
                 updateProgress();
                 
                 // Special handling for certain steps
+                if (stepNumber === 2) {
+                    triggerConfetti();
+                }
                 if (stepNumber === 4) {
                     document.getElementById('subjectDisplay').textContent = userData.situation.toLowerCase();
                 }
@@ -688,7 +929,7 @@
                 }
                 
                 window.scrollTo(0, 0);
-            }, 400);
+            }, 500);
         }
         
         // Validate step
@@ -733,6 +974,23 @@
             }
         }
         
+        // Trigger confetti (Étape 2)
+        function triggerConfetti() {
+            const colors = ['#1DB954', '#1ED760', '#F5C518', '#FFFFFF'];
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = '0s';
+                    confetti.style.animationDuration = (1.5 + Math.random() * 1) + 's';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 50);
+            }
+        }
+        
         // Select card (Step 3)
         function selectCard(element, value) {
             const cards = document.querySelectorAll('#situationCards .card');
@@ -758,14 +1016,14 @@
             }
         }
         
-        // Loading animation (Step 7)
+        // Loading animation (Step 7) avec icônes
         function startLoading() {
             const messages = [
-                { text: 'Analyse de ton profil...', progress: 0, duration: 1000 },
-                { text: 'Identification de tes points faibles...', progress: 25, duration: 1250 },
-                { text: 'Création de ton programme personnalisé...', progress: 50, duration: 1250 },
-                { text: 'Finalisation de ton espace...', progress: 75, duration: 1250 },
-                { text: '✅ Ton espace est prêt !', progress: 100, duration: 1000 }
+                { text: 'Analyse de ton profil...', progress: 0, duration: 1000, icon: '🔍' },
+                { text: 'Identification de tes points faibles...', progress: 25, duration: 1250, icon: '📊' },
+                { text: 'Création de ton programme personnalisé...', progress: 50, duration: 1250, icon: '🧠' },
+                { text: 'Finalisation de ton espace...', progress: 75, duration: 1250, icon: '✨' },
+                { text: 'Ton espace est prêt !', progress: 100, duration: 1000, icon: '✅' }
             ];
             
             let currentMessage = 0;
@@ -778,29 +1036,34 @@
                 }
                 
                 const msg = messages[currentMessage];
-                const messageEl = document.getElementById('loadingMessage');
+                const textEl = document.getElementById('loadingText');
+                const iconEl = document.getElementById('loadingIcon');
                 const percentEl = document.getElementById('progressPercent');
                 const circleEl = document.getElementById('progressCircle');
                 
                 // Fade out
-                messageEl.style.opacity = 0;
+                textEl.style.opacity = 0;
+                iconEl.style.opacity = 0;
                 
                 setTimeout(() => {
-                    messageEl.innerHTML = '<span>' + msg.text + '</span>';
+                    textEl.textContent = msg.text;
+                    iconEl.textContent = msg.icon;
                     percentEl.textContent = msg.progress + '%';
                     
                     const offset = circumference - (msg.progress / 100) * circumference;
                     circleEl.style.strokeDashoffset = offset;
                     
                     // Fade in
-                    messageEl.style.opacity = 1;
+                    textEl.style.opacity = 1;
+                    iconEl.style.opacity = 1;
                 }, 300);
                 
                 currentMessage++;
                 setTimeout(updateLoading, msg.duration);
             }
             
-            messageEl.style.transition = 'opacity 0.3s';
+            document.getElementById('loadingText').style.transition = 'opacity 0.3s';
+            document.getElementById('loadingIcon').style.transition = 'opacity 0.3s';
             updateLoading();
         }
         
@@ -849,6 +1112,14 @@
                     String(hours).padStart(2, '0') + ':' +
                     String(minutes).padStart(2, '0') + ':' +
                     String(seconds).padStart(2, '0');
+                
+                // Effet urgence si < 24h
+                const timerEl = document.getElementById('timer');
+                if (hours < 24) {
+                    timerEl.classList.add('urgent');
+                } else {
+                    timerEl.classList.remove('urgent');
+                }
             }
             
             updateCountdown();
@@ -857,7 +1128,8 @@
         
         // Handle payment
         function handlePayment() {
-            alert('Paiement en cours de configuration');
+            alert('Redirection vers le paiement...');
+            // TODO: intégrer Stripe
         }
         
         // Initialize
