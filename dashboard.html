@@ -3,595 +3,709 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — Bravoo</title>
+  <title>Mon programme • Bravoo</title>
   <!--
-    SUPABASE CONFIG (Benjamin doit créer un projet et ajouter ces valeurs) :
-    const SUPABASE_URL = 'https://xxxxx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbxxxxxx';
+    ⚙️ SUPABASE & STRIPE CONFIG
     
-    Quand ces valeurs sont renseignées, décommenter les blocs Supabase dans le JS.
+    1. Supabase:
+       - auth.users → prenom (user_metadata.first_name)
+       - table: progression (user_id, matiere, score, notions_maitrisees, total_notions)
+       - table: compte (user_id, objectif_note, moyenne_actuelle)
+    
+    2. Stripe:
+       - Free tier: accès au coach preview
+       - Premium tier: coach illimité + fonctionnalités avancées
+    
+    3. localStorage fallback (mode actuel):
+       - userData.firstName
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --bg-page: #121212;
-      --bg-surface: #181818;
-      --bg-surface-hover: #282828;
-      --primary: #1DB954;
-      --primary-light: #1ED760;
-      --accent: #F5C518;
-      --text-primary: #FFFFFF;
-      --text-secondary: #B3B3B3;
-      --text-muted: #727272;
-      --border-subtle: rgba(255, 255, 255, 0.06);
-      --green: #22c55e;
-      --red: #ef4444;
-      --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-
-    body {
-      font-family: var(--font-family);
-      background: var(--bg-page);
-      color: var(--text-primary);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      min-height: 100dvh;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: #121212; color: #FFFFFF; overflow: hidden; }
+    
+    .shell {
+      height: 100dvh;
       display: flex;
       flex-direction: column;
-      padding: 0;
-      overflow-x: hidden;
+      background: #121212;
     }
-
-    /* HEADER */
+    
+    /* Header */
     .header {
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
       flex-shrink: 0;
-    }
-
-    .header-left {
+      padding: 14px 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-
-    .logo {
-      font-size: 20px;
-      font-weight: 900;
-      color: var(--text-primary);
-    }
-
-    .logo-oo {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .user-greeting {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-secondary);
-    }
-
-    .user-greeting span {
-      color: var(--text-primary);
-    }
-
-    .profile-icon {
-      width: 36px;
-      height: 36px;
+    .header-logo {
+      width: 40px;
+      height: 40px;
       border-radius: 12px;
-      background: var(--primary);
+      background: #1DB954;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      cursor: pointer;
-      transition: transform 0.2s;
+      font-size: 20px;
     }
-
-    .profile-icon:hover {
-      transform: scale(1.05);
+    .header-text h1 {
+      font-size: 17px;
+      font-weight: 900;
+      color: #FFFFFF;
     }
-
-    /* MAIN CONTENT */
-    .main-content {
+    .header-text p {
+      font-size: 12px;
+      font-weight: 600;
+      color: #B3B3B3;
+      margin-top: 2px;
+    }
+    
+    /* Chat area */
+    .chat-area {
       flex: 1;
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 20px 20px 90px 20px;
-    }
-
-    .container {
-      max-width: 640px;
+      padding: 16px;
+      max-width: 600px;
+      width: 100%;
       margin: 0 auto;
     }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: 900;
-      color: var(--text-primary);
-      margin-bottom: 14px;
-    }
-
-    .section {
-      margin-bottom: 32px;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 0.5s ease-out forwards;
-    }
-
-    .section:nth-child(1) { animation-delay: 0.1s; }
-    .section:nth-child(2) { animation-delay: 0.2s; }
-    .section:nth-child(3) { animation-delay: 0.3s; }
-    .section:nth-child(4) { animation-delay: 0.4s; }
-
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* CARDS */
-    .card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      padding: 16px;
+    
+    /* Message bubbles */
+    .msg-coach {
+      max-width: 85%;
       margin-bottom: 12px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      cursor: pointer;
     }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(29, 185, 84, 0.15);
+    .msg-user {
+      max-width: 80%;
+      margin-left: auto;
+      margin-bottom: 12px;
     }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .card-title {
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--text-primary);
-    }
-
-    .card-badge {
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--text-primary);
-      background: var(--primary);
-      padding: 4px 8px;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .card-badge.todo {
-      background: var(--accent);
-      color: #121212;
-    }
-
-    .card-badge.progress {
-      background: #3b82f6;
-    }
-
-    .card-badge.done {
-      background: var(--green);
-    }
-
-    .card-desc {
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    .card-meta {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .card-meta-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* SUBJECT GRID */
-    .subject-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .subject-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
+    
+    .bubble-coach {
+      background: #181818;
       border-radius: 16px;
-      padding: 14px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      cursor: pointer;
+      border-top-left-radius: 4px;
+      padding: 14px 16px;
+      color: #FFFFFF;
+      font-size: 14px;
+      line-height: 1.6;
+      font-weight: 500;
     }
-
-    .subject-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(29, 185, 84, 0.15);
+    
+    .bubble-user {
+      background: #1DB954;
+      border-radius: 16px;
+      border-top-right-radius: 4px;
+      padding: 10px 16px;
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: right;
     }
-
-    .subject-header {
+    
+    /* Course block */
+    .course-block {
+      background: #181818;
+      border-radius: 16px;
+      border-top-left-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      max-width: 85%;
+    }
+    .course-header {
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 14px;
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+    .course-body {
+      padding: 14px 16px;
+    }
+    .course-bullet {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
       margin-bottom: 10px;
-    }
-
-    .subject-emoji {
-      font-size: 20px;
-    }
-
-    .subject-name {
       font-size: 14px;
-      font-weight: 800;
-      color: var(--text-primary);
+      line-height: 1.5;
+      font-weight: 500;
+      color: #FFFFFF;
     }
-
-    .progress-bar-bg {
-      height: 8px;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.1);
+    .course-bullet:last-child { margin-bottom: 0; }
+    .course-bullet-dot {
+      color: #1DB954;
+      font-weight: 900;
+      font-size: 16px;
+      line-height: 1.3;
+      flex-shrink: 0;
+    }
+    
+    /* Quiz block */
+    .quiz-block {
+      background: #181818;
+      border-radius: 16px;
+      border-top-left-radius: 4px;
       overflow: hidden;
-      margin-bottom: 6px;
+      margin-bottom: 12px;
+      max-width: 85%;
     }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--primary);
-      border-radius: 4px;
-      transition: width 0.8s ease;
-      width: 0;
-    }
-
-    .progress-percent {
+    .quiz-header {
+      padding: 12px 16px;
+      background: rgba(29,185,84,0.15);
+      color: #1DB954;
+      font-weight: 800;
       font-size: 12px;
-      font-weight: 700;
-      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
-
-    /* QUICK ACTIONS */
-    .quick-actions {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    .quiz-body {
+      padding: 14px 16px;
+    }
+    .quiz-question {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+      color: #FFFFFF;
+    }
+    .quiz-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .quiz-choice {
+      padding: 11px 14px;
+      border-radius: 14px;
+      border: 2px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+      font-size: 13px;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
       gap: 10px;
     }
-
-    .quick-action {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
+    .quiz-choice:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .quiz-choice.correct {
+      background: rgba(34,197,94,0.15);
+      border-color: #22c55e;
+    }
+    .quiz-choice.wrong {
+      background: rgba(239,68,68,0.15);
+      border-color: #ef4444;
+    }
+    .quiz-choice.disabled {
+      cursor: default;
+    }
+    .quiz-letter {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(29,185,84,0.2);
+      color: #1DB954;
+      font-size: 12px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .quiz-choice.correct .quiz-letter {
+      background: #22c55e;
+      color: #FFFFFF;
+    }
+    .quiz-choice.wrong .quiz-letter {
+      background: #ef4444;
+      color: #FFFFFF;
+    }
+    .quiz-explanation {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+    .quiz-explanation.correct {
+      background: rgba(34,197,94,0.15);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: #FFFFFF;
+    }
+    .quiz-explanation.wrong {
+      background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #FFFFFF;
+    }
+    
+    /* Flashcards block */
+    .flashcards-block {
+      background: #181818;
       border-radius: 16px;
-      padding: 16px 12px;
-      text-align: center;
-      transition: transform 0.2s, box-shadow 0.2s;
+      border-top-left-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      max-width: 85%;
+    }
+    .flashcards-header {
+      padding: 10px 16px;
+      background: rgba(245,197,24,0.15);
+      color: #F5C518;
+      font-weight: 800;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .flashcard-container {
+      padding: 28px 20px;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      text-decoration: none;
-      color: var(--text-primary);
+      user-select: none;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.5;
+      text-align: center;
+      transition: all 0.3s;
     }
-
-    .quick-action:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(29, 185, 84, 0.15);
+    .flashcard-container.front {
+      background: rgba(29,185,84,0.1);
+      color: #FFFFFF;
     }
-
-    .quick-action-icon {
-      font-size: 28px;
-      margin-bottom: 6px;
+    .flashcard-container.back {
+      background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+      color: #FFFFFF;
     }
-
-    .quick-action-label {
+    .flashcards-nav {
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .flashcards-nav button {
+      background: none;
+      border: none;
+      color: #1DB954;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .flashcards-nav button:disabled {
+      color: rgba(255,255,255,0.2);
+      cursor: default;
+    }
+    .flashcards-nav .hint {
+      font-size: 11px;
+      color: #B3B3B3;
+      font-weight: 600;
+    }
+    
+    /* Bottom controls */
+    .bottom-controls {
+      flex-shrink: 0;
+      background: #121212;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    
+    /* Action buttons */
+    .action-buttons {
+      padding: 12px 16px;
+      display: flex;
+      gap: 8px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 13px 12px;
+      border-radius: 12px;
+      border: none;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.1s;
+    }
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+    .action-btn.primary {
+      background: #1DB954;
+      color: #FFFFFF;
+    }
+    .action-btn.secondary {
+      background: #181818;
+      color: #FFFFFF;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+    
+    /* Quick actions */
+    .quick-actions {
+      padding: 8px 16px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .quick-action {
+      background: none;
+      border: none;
+      color: #B3B3B3;
       font-size: 12px;
       font-weight: 700;
-      color: var(--text-secondary);
-    }
-
-    /* BOTTOM NAV */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--bg-surface);
-      border-top: 1px solid var(--border-subtle);
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      cursor: pointer;
+      padding: 6px 10px;
       display: flex;
-      justify-content: space-around;
       align-items: center;
-      z-index: 100;
+      gap: 4px;
+      font-family: inherit;
     }
-
+    
+    /* Bottom nav */
+    .bottom-nav-wrap {
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    }
+    .bottom-nav {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #181818;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 6px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
     .nav-item {
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 4px;
-      text-decoration: none;
-      color: var(--text-muted);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 6px 12px;
+      min-height: 54px;
       border-radius: 12px;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 4px;
       transition: all 0.2s;
     }
-
     .nav-item.active {
-      color: var(--primary);
-      background: rgba(29, 185, 84, 0.1);
+      background: #1DB954;
+      color: #FFFFFF;
     }
-
-    .nav-item:hover {
-      color: var(--primary);
+    .nav-item:not(.active) {
+      color: #B3B3B3;
     }
-
-    /* RESPONSIVE */
-    @media (max-width: 480px) {
-      .main-content {
-        padding: 16px 16px 90px 16px;
-      }
-
-      .header {
-        padding: 14px 16px;
-      }
-
-      .logo {
-        font-size: 18px;
-      }
-
-      .subject-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .quick-actions {
-        grid-template-columns: 1fr;
-      }
+    .nav-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 900;
     }
-
-    /* LOADING ANIMATION */
-    .progress-bar-fill.animate {
-      animation: fillProgress 1s ease-out forwards;
+    .nav-item.active .nav-icon {
+      background: rgba(255,255,255,0.2);
     }
-
-    @keyframes fillProgress {
-      from {
-        width: 0;
-      }
+    .nav-item:not(.active) .nav-icon {
+      background: rgba(255,255,255,0.05);
     }
+    
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-left">
-      <div class="logo">
-        <span>Brav</span><span class="logo-oo">oo</span>
+  <div class="shell">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-logo">🎓</div>
+      <div class="header-text">
+        <h1>Mon programme</h1>
+        <p id="greetingText">Salut !</p>
       </div>
     </div>
-    <div class="user-greeting">
-      Salut <span id="userName">...</span> !
+    
+    <!-- Chat area -->
+    <div class="chat-area" id="chatArea">
+      <!-- Messages will be injected here -->
     </div>
-    <div class="profile-icon" onclick="alert('Profil bientôt disponible')">
-      👤
-    </div>
-  </div>
-
-  <!-- MAIN CONTENT -->
-  <div class="main-content">
-    <div class="container">
-      <!-- Ton programme du jour -->
-      <div class="section">
-        <h2 class="section-title">Ton programme du jour</h2>
-        <div class="card" onclick="window.location.href='chat.html'">
-          <div class="card-header">
-            <div class="card-title">📐 Équations du 1er degré</div>
-            <div class="card-badge todo">À faire</div>
-          </div>
-          <div class="card-desc">
-            Résous des équations simples et comprends la méthode
-          </div>
-          <div class="card-meta">
-            <div class="card-meta-item">⏱️ 15 min</div>
-            <div class="card-meta-item">🎯 8 exercices</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">📖 Conjugaison : Imparfait</div>
-            <div class="card-badge progress">En cours</div>
-          </div>
-          <div class="card-desc">
-            Maîtrise l'imparfait avec des verbes du 1er, 2ème et 3ème groupe
-          </div>
-          <div class="card-meta">
-            <div class="card-meta-item">⏱️ 10 min</div>
-            <div class="card-meta-item">🎯 5/12 réalisés</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">🌍 Les grandes découvertes</div>
-            <div class="card-badge done">Terminé</div>
-          </div>
-          <div class="card-desc">
-            Quiz sur Christophe Colomb et les explorateurs du XVe siècle
-          </div>
-          <div class="card-meta">
-            <div class="card-meta-item">✅ 9/10 bonnes réponses</div>
-          </div>
-        </div>
+    
+    <!-- Bottom controls -->
+    <div class="bottom-controls">
+      <!-- Action buttons (hidden initially) -->
+      <div class="action-buttons hidden" id="actionButtons">
+        <button class="action-btn primary" id="actionBtn1"></button>
+        <button class="action-btn secondary" id="actionBtn2"></button>
       </div>
-
-      <!-- Continue où tu en étais -->
-      <div class="section">
-        <h2 class="section-title">Continue où tu en étais</h2>
-        <div class="card" onclick="window.location.href='chat.html'">
-          <div class="card-header">
-            <div class="card-title">🔬 Les états de la matière</div>
-            <div class="card-badge progress">En cours</div>
-          </div>
-          <div class="card-desc">
-            Cours + quiz interactif sur solide, liquide, gaz
-          </div>
-          <div class="card-meta">
-            <div class="card-meta-item">📊 Progression : 40%</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tes matières -->
-      <div class="section">
-        <h2 class="section-title">Tes matières</h2>
-        <div class="subject-grid" id="subjectGrid"></div>
-      </div>
-
+      
       <!-- Quick actions -->
-      <div class="section">
-        <h2 class="section-title">Actions rapides</h2>
-        <div class="quick-actions">
-          <a href="chat.html" class="quick-action">
-            <div class="quick-action-icon">🧠</div>
-            <div class="quick-action-label">Parler au coach</div>
+      <div class="quick-actions">
+        <button class="quick-action" id="questionBtn">💬 Poser une question</button>
+        <button class="quick-action" id="skipBtn">⏭️ Passer à autre chose</button>
+      </div>
+      
+      <!-- Bottom nav -->
+      <div class="bottom-nav-wrap">
+        <div class="bottom-nav">
+          <a href="dashboard.html" class="nav-item active">
+            <span class="nav-icon">🎯</span>
+            <span>Mon programme</span>
           </a>
-          <div class="quick-action" onclick="alert('Quiz rapide bientôt disponible')">
-            <div class="quick-action-icon">📝</div>
-            <div class="quick-action-label">Quiz rapide</div>
-          </div>
-          <div class="quick-action" onclick="alert('Flashcards bientôt disponibles')">
-            <div class="quick-action-icon">🃏</div>
-            <div class="quick-action-label">Flashcards</div>
-          </div>
+          <a href="progression.html" class="nav-item">
+            <span class="nav-icon">📊</span>
+            <span>Ma progression</span>
+          </a>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <a href="dashboard.html" class="nav-item active">🎯 Programme</a>
-    <a href="progression.html" class="nav-item">📊 Progression</a>
-    <a href="#" class="nav-item" onclick="event.preventDefault(); alert('Profil bientôt disponible')">👤 Profil</a>
-  </nav>
-
+  
   <script>
-    // DONNÉES SIMULÉES
-    const SUBJECTS = [
-      { name: 'Mathématiques', emoji: '📐', progress: 65 },
-      { name: 'Français', emoji: '📖', progress: 72 },
-      { name: 'Histoire-Géo', emoji: '🌍', progress: 45 },
-      { name: 'Sciences', emoji: '🔬', progress: 58 },
-      { name: 'Anglais', emoji: '🇬🇧', progress: 81 },
-      { name: 'Espagnol', emoji: '🇪🇸', progress: 52 }
+    // Get user data
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const prenom = userData.firstName || 'toi';
+    document.getElementById('greetingText').textContent = `Salut ${prenom} !`;
+    
+    // Chat messages data
+    const messages = [
+      {
+        type: 'coach-text',
+        content: `Salut ${prenom} ! Aujourd'hui on travaille sur les équations du 1er degré. C'est une notion clé pour le brevet. On y va ?`
+      },
+      {
+        type: 'action',
+        options: ['C\'est parti ! 🚀', 'Autre chose']
+      },
+      {
+        type: 'user',
+        content: 'C\'est parti ! 🚀'
+      },
+      {
+        type: 'course',
+        title: '📐 Les équations du 1er degré',
+        bullets: [
+          'Une équation c\'est une égalité avec une inconnue (x)',
+          'Pour résoudre : on isole x en faisant la même opération des deux côtés',
+          'Exemple : 2x + 3 = 7 → 2x = 4 → x = 2',
+          'Toujours vérifier : 2(2) + 3 = 7 ✓'
+        ]
+      },
+      {
+        type: 'quiz',
+        question: 'Résous : 3x - 6 = 9',
+        choices: ['x = 1', 'x = 3', 'x = 5', 'x = 15'],
+        correctIndex: 2,
+        explanation: '3x = 9 + 6 = 15, donc x = 15/3 = 5'
+      },
+      {
+        type: 'flashcards',
+        cards: [
+          { front: 'Qu\'est-ce qu\'une équation ?', back: 'Une égalité contenant une inconnue à déterminer' },
+          { front: 'Comment résoudre 5x = 20 ?', back: 'On divise des deux côtés par 5 : x = 4' },
+          { front: 'Que signifie "vérifier" une équation ?', back: 'Remplacer x par la valeur trouvée et vérifier que l\'égalité est vraie' }
+        ]
+      },
+      {
+        type: 'coach-text',
+        content: 'Bravo ! Tu as bien compris les bases. On continue avec des exercices plus durs ou tu veux revoir quelque chose ?'
+      },
+      {
+        type: 'action',
+        options: ['Exercices avancés 💪', 'Revoir les bases']
+      },
+      {
+        type: 'coach-text',
+        content: 'Le coach IA sera disponible très bientôt ! En attendant, voici un aperçu de ton expérience. 😊'
+      }
     ];
-
-    // Récupérer le prénom depuis localStorage (userData de l'onboarding)
-    function loadUserData() {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        try {
-          const data = JSON.parse(userData);
-          document.getElementById('userName').textContent = data.prenom || 'toi';
-        } catch (e) {
-          document.getElementById('userName').textContent = 'toi';
-        }
-      } else {
-        document.getElementById('userName').textContent = 'toi';
+    
+    // Render messages
+    const chatArea = document.getElementById('chatArea');
+    
+    messages.forEach((msg, idx) => {
+      if (msg.type === 'coach-text') {
+        const div = document.createElement('div');
+        div.className = 'msg-coach';
+        div.innerHTML = `<div class="bubble-coach">${msg.content}</div>`;
+        chatArea.appendChild(div);
       }
-    }
-
-    // Afficher les matières avec progression
-    function renderSubjects() {
-      const grid = document.getElementById('subjectGrid');
-      grid.innerHTML = '';
-
-      SUBJECTS.forEach((subject, index) => {
-        const card = document.createElement('div');
-        card.className = 'subject-card';
-        card.innerHTML = `
-          <div class="subject-header">
-            <div class="subject-emoji">${subject.emoji}</div>
-            <div class="subject-name">${subject.name}</div>
+      else if (msg.type === 'user') {
+        const div = document.createElement('div');
+        div.className = 'msg-user';
+        div.innerHTML = `<div class="bubble-user">${msg.content}</div>`;
+        chatArea.appendChild(div);
+      }
+      else if (msg.type === 'course') {
+        const div = document.createElement('div');
+        div.className = 'msg-coach';
+        const bulletsHTML = msg.bullets.map(b => 
+          `<div class="course-bullet"><span class="course-bullet-dot">•</span><span>${b}</span></div>`
+        ).join('');
+        div.innerHTML = `
+          <div class="course-block">
+            <div class="course-header">${msg.title}</div>
+            <div class="course-body">${bulletsHTML}</div>
           </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" data-progress="${subject.progress}"></div>
-          </div>
-          <div class="progress-percent">${subject.progress}%</div>
         `;
-        card.addEventListener('click', () => {
-          window.location.href = 'chat.html';
+        chatArea.appendChild(div);
+      }
+      else if (msg.type === 'quiz') {
+        const div = document.createElement('div');
+        div.className = 'msg-coach';
+        const choicesHTML = msg.choices.map((choice, i) => 
+          `<div class="quiz-choice" data-index="${i}">
+            <span class="quiz-letter">${String.fromCharCode(65 + i)}</span>
+            <span>${choice}</span>
+          </div>`
+        ).join('');
+        div.innerHTML = `
+          <div class="quiz-block">
+            <div class="quiz-header">❓ Quiz</div>
+            <div class="quiz-body">
+              <div class="quiz-question">${msg.question}</div>
+              <div class="quiz-choices">${choicesHTML}</div>
+            </div>
+          </div>
+        `;
+        chatArea.appendChild(div);
+        
+        // Add quiz interaction
+        let answered = false;
+        const choices = div.querySelectorAll('.quiz-choice');
+        const quizBody = div.querySelector('.quiz-body');
+        choices.forEach((choice, i) => {
+          choice.addEventListener('click', () => {
+            if (answered) return;
+            answered = true;
+            const isCorrect = i === msg.correctIndex;
+            
+            choices.forEach((c, j) => {
+              c.classList.add('disabled');
+              if (j === msg.correctIndex) c.classList.add('correct');
+              else if (j === i) c.classList.add('wrong');
+            });
+            
+            const explanation = document.createElement('div');
+            explanation.className = `quiz-explanation ${isCorrect ? 'correct' : 'wrong'}`;
+            explanation.textContent = (isCorrect ? 'Bien joué ! ' : 'Pas tout à fait. ') + msg.explanation;
+            quizBody.appendChild(explanation);
+          });
         });
-        grid.appendChild(card);
-
-        // Animation de remplissage de la barre
-        setTimeout(() => {
-          const fill = card.querySelector('.progress-bar-fill');
-          fill.style.width = subject.progress + '%';
-        }, 100 + index * 100);
-      });
-    }
-
-    // INIT
-    loadUserData();
-    renderSubjects();
-
-    // SUPABASE (à décommenter quand Benjamin aura configuré)
-    /*
-    const SUPABASE_URL = 'https://xxxxx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbxxxxxx';
-    
-    async function loadUserDataFromSupabase() {
-      // Vérifier la session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        window.location.href = 'index.html';
-        return;
       }
-      
-      // Charger les données utilisateur
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .single();
-      
-      if (data) {
-        document.getElementById('userName').textContent = data.prenom || 'toi';
+      else if (msg.type === 'flashcards') {
+        const div = document.createElement('div');
+        div.className = 'msg-coach';
+        div.innerHTML = `
+          <div class="flashcards-block">
+            <div class="flashcards-header">
+              <span>🃏 Flashcards</span>
+              <span class="card-counter">1/${msg.cards.length}</span>
+            </div>
+            <div class="flashcard-container front">${msg.cards[0].front}</div>
+            <div class="flashcards-nav">
+              <button class="prev-btn" disabled>← Précédent</button>
+              <span class="hint">Tape pour retourner</span>
+              <button class="next-btn">Suivant →</button>
+            </div>
+          </div>
+        `;
+        chatArea.appendChild(div);
+        
+        // Add flashcard interaction
+        let currentIndex = 0;
+        let flipped = false;
+        const container = div.querySelector('.flashcard-container');
+        const counter = div.querySelector('.card-counter');
+        const prevBtn = div.querySelector('.prev-btn');
+        const nextBtn = div.querySelector('.next-btn');
+        
+        function updateCard() {
+          const card = msg.cards[currentIndex];
+          container.textContent = flipped ? card.back : card.front;
+          container.className = `flashcard-container ${flipped ? 'back' : 'front'}`;
+          counter.textContent = `${currentIndex + 1}/${msg.cards.length}`;
+          prevBtn.disabled = currentIndex === 0;
+          nextBtn.disabled = currentIndex === msg.cards.length - 1;
+        }
+        
+        container.addEventListener('click', () => {
+          flipped = !flipped;
+          updateCard();
+        });
+        
+        prevBtn.addEventListener('click', () => {
+          if (currentIndex > 0) {
+            currentIndex--;
+            flipped = false;
+            updateCard();
+          }
+        });
+        
+        nextBtn.addEventListener('click', () => {
+          if (currentIndex < msg.cards.length - 1) {
+            currentIndex++;
+            flipped = false;
+            updateCard();
+          }
+        });
       }
-    }
+      else if (msg.type === 'action') {
+        // Store for bottom buttons
+        if (idx === messages.length - 2) { // "Exercices avancés" action
+          setTimeout(() => {
+            const actionButtons = document.getElementById('actionButtons');
+            const btn1 = document.getElementById('actionBtn1');
+            const btn2 = document.getElementById('actionBtn2');
+            btn1.textContent = msg.options[0];
+            btn2.textContent = msg.options[1];
+            actionButtons.classList.remove('hidden');
+          }, 100);
+        }
+      }
+    });
     
-    // loadUserDataFromSupabase();
-    */
+    // Quick actions
+    document.getElementById('questionBtn').addEventListener('click', () => {
+      alert('Le coach IA sera disponible très bientôt !');
+    });
+    
+    document.getElementById('skipBtn').addEventListener('click', () => {
+      alert('Le coach IA sera disponible très bientôt !');
+    });
+    
+    // Action buttons
+    document.getElementById('actionBtn1').addEventListener('click', () => {
+      alert('Le coach IA sera disponible très bientôt !');
+    });
+    
+    document.getElementById('actionBtn2').addEventListener('click', () => {
+      alert('Le coach IA sera disponible très bientôt !');
+    });
+    
+    // Auto-scroll to bottom
+    setTimeout(() => {
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }, 100);
   </script>
 </body>
 </html>

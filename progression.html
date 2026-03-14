@@ -3,742 +3,558 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ma progression — Bravoo</title>
+  <title>Ma progression • Bravoo</title>
   <!--
-    SUPABASE CONFIG (Benjamin doit créer un projet et ajouter ces valeurs) :
-    const SUPABASE_URL = 'https://xxxxx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbxxxxxx';
+    ⚙️ SUPABASE & STRIPE CONFIG
     
-    Quand ces valeurs sont renseignées, décommenter les blocs Supabase dans le JS.
+    1. Supabase:
+       - auth.users → prenom (user_metadata.first_name)
+       - table: progression (user_id, matiere, score, notions_maitrisees, total_notions)
+       - table: compte (user_id, objectif_note, moyenne_actuelle)
+    
+    2. Stripe:
+       - Free tier: accès au coach preview
+       - Premium tier: coach illimité + fonctionnalités avancées
+    
+    3. localStorage fallback (mode actuel):
+       - userData.firstName
+       - userData.goal (objectif)
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --bg-page: #121212;
-      --bg-surface: #181818;
-      --bg-surface-hover: #282828;
-      --primary: #1DB954;
-      --primary-light: #1ED760;
-      --accent: #F5C518;
-      --text-primary: #FFFFFF;
-      --text-secondary: #B3B3B3;
-      --text-muted: #727272;
-      --border-subtle: rgba(255, 255, 255, 0.06);
-      --green: #22c55e;
-      --red: #ef4444;
-      --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-
-    body {
-      font-family: var(--font-family);
-      background: var(--bg-page);
-      color: var(--text-primary);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      min-height: 100dvh;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: #121212; color: #FFFFFF; overflow: hidden; }
+    
+    .shell {
+      height: 100dvh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
+      background: #121212;
     }
-
-    /* HEADER */
+    
+    /* Header */
     .header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border-subtle);
       flex-shrink: 0;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-
-    .header-title {
+    .header h1 {
       font-size: 20px;
       font-weight: 900;
-      color: var(--text-primary);
+      color: #FFFFFF;
       margin-bottom: 4px;
     }
-
-    .header-subtitle {
+    .header p {
       font-size: 13px;
       font-weight: 600;
-      color: var(--text-secondary);
+      color: #B3B3B3;
     }
-
-    /* MAIN CONTENT */
-    .main-content {
+    
+    /* Content area */
+    .content {
       flex: 1;
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 20px 20px 90px 20px;
-    }
-
-    .container {
-      max-width: 640px;
+      padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+      max-width: 600px;
+      width: 100%;
       margin: 0 auto;
     }
-
-    /* CARDS */
-    .card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      padding: 18px 16px;
-      margin-bottom: 14px;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 0.5s ease-out forwards;
-    }
-
-    .card:nth-child(1) { animation-delay: 0.05s; }
-    .card:nth-child(2) { animation-delay: 0.1s; }
-    .card:nth-child(3) { animation-delay: 0.15s; }
-    .card:nth-child(4) { animation-delay: 0.2s; }
-    .card:nth-child(5) { animation-delay: 0.25s; }
-    .card:nth-child(6) { animation-delay: 0.3s; }
-    .card:nth-child(7) { animation-delay: 0.35s; }
-    .card:nth-child(8) { animation-delay: 0.4s; }
-
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .card-center {
+    
+    /* Score circle */
+    .score-section {
       text-align: center;
+      margin-bottom: 24px;
     }
-
-    .card-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    /* SCORE GLOBAL */
-    .score-circle {
-      width: 140px;
-      height: 140px;
-      margin: 0 auto 16px;
+    .score-circle-wrap {
       position: relative;
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 16px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-
-    .score-circle svg {
-      width: 100%;
-      height: 100%;
-      transform: rotate(-90deg);
+    .score-circle-wrap svg {
       position: absolute;
       top: 0;
       left: 0;
     }
-
-    .score-circle circle {
-      fill: none;
-      stroke-width: 12;
-    }
-
-    .score-circle .circle-bg {
-      stroke: rgba(255, 255, 255, 0.1);
-    }
-
-    .score-circle .circle-progress {
-      stroke: var(--primary);
-      stroke-linecap: round;
-      transition: stroke-dashoffset 1s ease;
-    }
-
-    .score-value {
+    .score-text {
       position: relative;
-      z-index: 2;
-      font-size: 48px;
+      z-index: 10;
+      font-size: 42px;
       font-weight: 900;
-      color: var(--text-primary);
+      color: #1DB954;
       line-height: 1;
     }
-
     .score-label {
       font-size: 14px;
       font-weight: 700;
-      color: var(--text-secondary);
-    }
-
-    .notions-mastered {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-secondary);
+      color: #B3B3B3;
       margin-top: 8px;
     }
-
-    .notions-mastered strong {
-      color: var(--primary);
-      font-weight: 800;
-    }
-
-    /* INFO CARDS */
-    .info-grid {
+    
+    /* Info cards */
+    .info-cards {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
+      margin-bottom: 24px;
     }
-
     .info-card {
+      background: #181818;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 16px;
       text-align: center;
     }
-
-    .info-value {
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--primary);
-      margin-bottom: 4px;
-    }
-
-    .info-label {
+    .info-card-label {
       font-size: 12px;
       font-weight: 700;
-      color: var(--text-muted);
+      color: #B3B3B3;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
-
-    /* SUBJECT LIST */
+    .info-card-value {
+      font-size: 24px;
+      font-weight: 900;
+      color: #FFFFFF;
+    }
+    
+    /* Section title */
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-bottom: 12px;
+    }
+    
+    /* Subject progress */
+    .subjects-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
     .subject-item {
-      margin-bottom: 14px;
+      background: #181818;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 14px 16px;
     }
-
-    .subject-item:last-child {
-      margin-bottom: 0;
-    }
-
     .subject-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 8px;
     }
-
     .subject-name {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 700;
       font-size: 14px;
+      font-weight: 700;
+      color: #FFFFFF;
     }
-
-    .subject-emoji {
-      font-size: 18px;
-    }
-
     .subject-score {
       font-size: 13px;
       font-weight: 800;
+      color: #1DB954;
     }
-
-    .subject-stats {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-left: 8px;
-    }
-
-    .progress-bar-bg {
-      height: 8px;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.1);
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
       overflow: hidden;
     }
-
-    .progress-bar-fill {
+    .progress-fill {
       height: 100%;
-      border-radius: 4px;
-      transition: width 0.8s ease;
-      width: 0;
+      background: linear-gradient(90deg, #1DB954 0%, #1ed760 100%);
+      border-radius: 3px;
+      transition: width 0.6s ease;
     }
-
-    /* STRENGTH/WEAKNESS GRID */
-    .strength-grid {
+    
+    /* Points section */
+    .points-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
+      margin-bottom: 24px;
     }
-
-    .strength-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 16px;
+    .points-col {
+      background: #181818;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
       padding: 14px;
     }
-
-    .strength-title {
+    .points-title {
       font-size: 13px;
       font-weight: 800;
       margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
-
-    .strength-title.strong {
-      color: var(--green);
+    .points-title.strong {
+      color: #1DB954;
     }
-
-    .strength-title.weak {
-      color: var(--accent);
+    .points-title.weak {
+      color: #F5C518;
     }
-
-    .strength-list {
+    .points-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
-
-    .strength-item {
-      font-size: 13px;
+    .points-item {
+      font-size: 12px;
       font-weight: 600;
-      color: var(--text-primary);
+      color: #B3B3B3;
       display: flex;
       align-items: center;
       gap: 6px;
     }
-
-    .strength-empty {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-style: italic;
+    .points-bullet {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
     }
-
-    /* STATS GRID */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    
+    /* Account section */
+    .account-section {
+      background: #181818;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .account-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-bottom: 12px;
+    }
+    .account-actions {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
     }
-
-    .stat-card {
-      text-align: center;
-      padding: 12px 8px;
-      background: rgba(29, 185, 84, 0.05);
-      border-radius: 12px;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 900;
-      color: var(--primary);
-      margin-bottom: 2px;
-    }
-
-    .stat-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-secondary);
-    }
-
-    /* LOGOUT BUTTON */
-    .logout-btn {
-      width: 100%;
-      padding: 14px 16px;
-      border-radius: 12px;
-      border: 1px solid var(--border-subtle);
-      background: var(--bg-surface);
-      color: var(--text-primary);
-      font-size: 14px;
-      font-weight: 700;
+    .account-btn {
+      background: none;
+      border: none;
+      color: #B3B3B3;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      padding: 8px 0;
       cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-      font-family: var(--font-family);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      font-family: inherit;
+      transition: color 0.2s;
     }
-
-    .logout-btn:hover {
-      background: var(--bg-surface-hover);
-      transform: translateY(-2px);
+    .account-btn:hover {
+      color: #FFFFFF;
     }
-
-    .logout-btn.danger {
-      color: var(--red);
-      border-color: rgba(239, 68, 68, 0.3);
+    .account-btn.danger {
+      color: #ef4444;
     }
-
-    /* BOTTOM NAV */
-    .bottom-nav {
+    .account-btn.danger:hover {
+      color: #f87171;
+    }
+    
+    /* Bottom nav */
+    .bottom-nav-wrap {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: var(--bg-surface);
-      border-top: 1px solid var(--border-subtle);
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 100;
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+      background: #121212;
+      border-top: 1px solid rgba(255,255,255,0.06);
     }
-
+    .bottom-nav {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #181818;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 6px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
     .nav-item {
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 4px;
-      text-decoration: none;
-      color: var(--text-muted);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 6px 12px;
+      min-height: 54px;
       border-radius: 12px;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 4px;
       transition: all 0.2s;
     }
-
     .nav-item.active {
-      color: var(--primary);
-      background: rgba(29, 185, 84, 0.1);
+      background: #1DB954;
+      color: #FFFFFF;
     }
-
-    .nav-item:hover {
-      color: var(--primary);
+    .nav-item:not(.active) {
+      color: #B3B3B3;
     }
-
-    /* RESPONSIVE */
-    @media (max-width: 480px) {
-      .main-content {
-        padding: 16px 16px 90px 16px;
-      }
-
-      .header {
-        padding: 14px 16px;
-      }
-
-      .info-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .strength-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
+    .nav-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .nav-item.active .nav-icon {
+      background: rgba(255,255,255,0.2);
+    }
+    .nav-item:not(.active) .nav-icon {
+      background: rgba(255,255,255,0.05);
     }
   </style>
 </head>
 <body>
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-title">📊 Ma progression</div>
-    <div class="header-subtitle" id="headerSubtitle">Chargement...</div>
-  </div>
-
-  <!-- MAIN CONTENT -->
-  <div class="main-content">
-    <div class="container">
-      <!-- Score global -->
-      <div class="card card-center">
-        <div class="card-title">Score de préparation</div>
-        <div class="score-circle">
-          <svg viewBox="0 0 120 120">
-            <circle class="circle-bg" cx="60" cy="60" r="54"></circle>
-            <circle class="circle-progress" cx="60" cy="60" r="54" id="scoreCircle"
-              stroke-dasharray="339.292" stroke-dashoffset="339.292"></circle>
+  <div class="shell">
+    <!-- Header -->
+    <div class="header">
+      <h1>📊 Ma progression</h1>
+      <p id="headerSubtitle">Objectif : 15/20</p>
+    </div>
+    
+    <!-- Content -->
+    <div class="content">
+      <!-- Score circle -->
+      <div class="score-section">
+        <div class="score-circle-wrap">
+          <svg width="160" height="160" style="transform: rotate(-90deg);">
+            <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12"/>
+            <circle id="progressCircle" cx="80" cy="80" r="70" fill="none" stroke="url(#gradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440" style="transition: stroke-dashoffset 1s ease;"/>
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#1DB954;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#1ed760;stop-opacity:1" />
+              </linearGradient>
+            </defs>
           </svg>
-          <div class="score-value" id="scoreValue">0</div>
+          <div class="score-text" id="scoreText">0%</div>
         </div>
-        <div class="score-label">de maîtrise globale</div>
-        <div class="notions-mastered">
-          <strong id="masteredCount">0</strong>/<span id="totalCount">0</span> notions maîtrisées
-        </div>
+        <div class="score-label" id="scoreLabel">0/89 notions maîtrisées</div>
       </div>
-
+      
       <!-- Info cards -->
-      <div class="info-grid">
-        <div class="card info-card">
-          <div class="info-value" id="averageScore">--</div>
-          <div class="info-label">/20 de moyenne</div>
+      <div class="info-cards">
+        <div class="info-card">
+          <div class="info-card-label">Moyenne actuelle</div>
+          <div class="info-card-value">12.5<span style="font-size: 16px; color: #B3B3B3;">/20</span></div>
         </div>
-        <div class="card info-card">
-          <div class="info-value" id="goalScore">--</div>
-          <div class="info-label">/20 objectif</div>
+        <div class="info-card">
+          <div class="info-card-label">Objectif</div>
+          <div class="info-card-value" id="objectifValue">15<span style="font-size: 16px; color: #B3B3B3;">/20</span></div>
         </div>
       </div>
-
-      <!-- Par matière -->
-      <div class="card">
-        <div class="card-title">Par matière</div>
-        <div id="subjectList"></div>
+      
+      <!-- Subjects -->
+      <div class="section-title">Par matière</div>
+      <div class="subjects-list">
+        <div class="subject-item">
+          <div class="subject-header">
+            <div class="subject-name">📐 Mathématiques</div>
+            <div class="subject-score">65%</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" data-width="65"></div>
+          </div>
+        </div>
+        <div class="subject-item">
+          <div class="subject-header">
+            <div class="subject-name">📖 Français</div>
+            <div class="subject-score">52%</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" data-width="52"></div>
+          </div>
+        </div>
+        <div class="subject-item">
+          <div class="subject-header">
+            <div class="subject-name">🌍 Histoire-Géo</div>
+            <div class="subject-score">48%</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" data-width="48"></div>
+          </div>
+        </div>
+        <div class="subject-item">
+          <div class="subject-header">
+            <div class="subject-name">🔬 Sciences</div>
+            <div class="subject-score">61%</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" data-width="61"></div>
+          </div>
+        </div>
+        <div class="subject-item">
+          <div class="subject-header">
+            <div class="subject-name">🇬🇧 Anglais</div>
+            <div class="subject-score">70%</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" data-width="70"></div>
+          </div>
+        </div>
       </div>
-
+      
       <!-- Points forts vs À travailler -->
-      <div class="strength-grid">
-        <div class="strength-card">
-          <div class="strength-title strong">💪 Points forts</div>
-          <div class="strength-list" id="strengthList"></div>
+      <div class="section-title">Analyse</div>
+      <div class="points-grid">
+        <div class="points-col">
+          <div class="points-title strong">✨ Points forts</div>
+          <div class="points-list">
+            <div class="points-item">
+              <span class="points-bullet"></span>
+              <span>Anglais</span>
+            </div>
+            <div class="points-item">
+              <span class="points-bullet"></span>
+              <span>Mathématiques</span>
+            </div>
+            <div class="points-item">
+              <span class="points-bullet"></span>
+              <span>Sciences</span>
+            </div>
+          </div>
         </div>
-        <div class="strength-card">
-          <div class="strength-title weak">🎯 À travailler</div>
-          <div class="strength-list" id="weaknessList"></div>
+        <div class="points-col">
+          <div class="points-title weak">💡 À travailler</div>
+          <div class="points-list">
+            <div class="points-item">
+              <span class="points-bullet"></span>
+              <span>Histoire-Géo</span>
+            </div>
+            <div class="points-item">
+              <span class="points-bullet"></span>
+              <span>Français</span>
+            </div>
+          </div>
         </div>
       </div>
-
-      <!-- Stats -->
-      <div class="card">
-        <div class="card-title">Tes statistiques</div>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-value" id="sessionsCompleted">0</div>
-            <div class="stat-label">Sessions complétées</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="streakDays">0</div>
-            <div class="stat-label">Jours de suite</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="totalTime">0h</div>
-            <div class="stat-label">Temps total</div>
-          </div>
+      
+      <!-- Account section -->
+      <div class="account-section">
+        <div class="account-title">Mon compte</div>
+        <div class="account-actions">
+          <button class="account-btn" id="changePasswordBtn">Changer mon mot de passe</button>
+          <button class="account-btn" id="contactSupportBtn">Contacter le support (contact@bravoo.com)</button>
+          <button class="account-btn" id="logoutBtn">Me déconnecter</button>
+          <button class="account-btn danger" id="deleteAccountBtn">Supprimer mon compte</button>
         </div>
       </div>
-
-      <!-- Déconnexion -->
-      <button class="logout-btn danger" onclick="handleLogout()">
-        🚪 Me déconnecter
-      </button>
+    </div>
+    
+    <!-- Bottom nav -->
+    <div class="bottom-nav-wrap">
+      <div class="bottom-nav">
+        <a href="dashboard.html" class="nav-item">
+          <span class="nav-icon">🎯</span>
+          <span>Mon programme</span>
+        </a>
+        <a href="progression.html" class="nav-item active">
+          <span class="nav-icon">📊</span>
+          <span>Ma progression</span>
+        </a>
+      </div>
     </div>
   </div>
-
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <a href="dashboard.html" class="nav-item">🎯 Programme</a>
-    <a href="progression.html" class="nav-item active">📊 Progression</a>
-    <a href="#" class="nav-item" onclick="event.preventDefault(); alert('Profil bientôt disponible')">👤 Profil</a>
-  </nav>
-
+  
   <script>
-    // DONNÉES SIMULÉES
-    const SUBJECTS = [
-      { name: 'Mathématiques', emoji: '📐', progress: 65, mastered: 32, total: 45 },
-      { name: 'Français', emoji: '📖', progress: 72, mastered: 28, total: 38 },
-      { name: 'Histoire-Géo', emoji: '🌍', progress: 45, mastered: 18, total: 42 },
-      { name: 'Sciences', emoji: '🔬', progress: 58, mastered: 24, total: 40 },
-      { name: 'Anglais', emoji: '🇬🇧', progress: 81, mastered: 35, total: 42 },
-      { name: 'Espagnol', emoji: '🇪🇸', progress: 52, mastered: 21, total: 38 }
-    ];
-
-    // Récupérer les données utilisateur depuis localStorage
-    function getUserData() {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        try {
-          return JSON.parse(userData);
-        } catch (e) {
-          return null;
-        }
-      }
-      return null;
-    }
-
-    // Calculer le score global
-    function calculateGlobalScore() {
-      const totalMastered = SUBJECTS.reduce((sum, s) => sum + s.mastered, 0);
-      const totalNotions = SUBJECTS.reduce((sum, s) => sum + s.total, 0);
-      return Math.round((totalMastered / totalNotions) * 100);
-    }
-
-    // Couleur en fonction du score
-    function getScoreColor(score) {
-      if (score >= 70) return 'var(--green)';
-      if (score >= 40) return 'var(--accent)';
-      return 'var(--red)';
-    }
-
-    // Animer le score global
-    function animateScore(targetScore) {
-      const scoreValueEl = document.getElementById('scoreValue');
-      const scoreCircle = document.getElementById('scoreCircle');
-      const circumference = 339.292;
-      let currentScore = 0;
-      const duration = 1500;
-      const steps = 60;
-      const stepDuration = duration / steps;
-      const increment = targetScore / steps;
-
+    // Get user data
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const prenom = userData.firstName || 'toi';
+    const goal = userData.goal || 15;
+    
+    // Update header
+    document.getElementById('headerSubtitle').textContent = `${prenom} — Objectif : ${goal}/20`;
+    document.getElementById('objectifValue').innerHTML = `${goal}<span style="font-size: 16px; color: #B3B3B3;">/20</span>`;
+    
+    // Animate score circle
+    const targetScore = 58;
+    const notionsMaitrisees = 47;
+    const totalNotions = 89;
+    
+    function animateScore() {
+      const scoreText = document.getElementById('scoreText');
+      const scoreLabel = document.getElementById('scoreLabel');
+      const progressCircle = document.getElementById('progressCircle');
+      
+      // Animate percentage text
+      let current = 0;
+      const duration = 1000;
+      const increment = targetScore / (duration / 16);
+      
       const interval = setInterval(() => {
-        currentScore += increment;
-        if (currentScore >= targetScore) {
-          currentScore = targetScore;
+        current += increment;
+        if (current >= targetScore) {
+          current = targetScore;
           clearInterval(interval);
         }
-
-        const displayScore = Math.round(currentScore);
-        scoreValueEl.textContent = displayScore + '%';
-
-        const offset = circumference - (currentScore / 100) * circumference;
-        scoreCircle.style.strokeDashoffset = offset;
-      }, stepDuration);
+        scoreText.textContent = Math.round(current) + '%';
+      }, 16);
+      
+      // Animate circle
+      const circumference = 2 * Math.PI * 70;
+      const offset = circumference - (targetScore / 100) * circumference;
+      setTimeout(() => {
+        progressCircle.style.strokeDashoffset = offset;
+      }, 100);
+      
+      // Update label
+      scoreLabel.textContent = `${notionsMaitrisees}/${totalNotions} notions maîtrisées`;
     }
-
-    // Afficher les matières
-    function renderSubjects() {
-      const listEl = document.getElementById('subjectList');
-      listEl.innerHTML = '';
-
-      SUBJECTS.forEach((subject, index) => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'subject-item';
-        const color = getScoreColor(subject.progress);
-        itemDiv.innerHTML = `
-          <div class="subject-header">
-            <div class="subject-name">
-              <span class="subject-emoji">${subject.emoji}</span>
-              <span>${subject.name}</span>
-            </div>
-            <div>
-              <span class="subject-score" style="color: ${color};">${subject.progress}%</span>
-              <span class="subject-stats">${subject.mastered}/${subject.total}</span>
-            </div>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="background: ${color};" data-progress="${subject.progress}"></div>
-          </div>
-        `;
-        listEl.appendChild(itemDiv);
-
-        // Animer la barre de progression
+    
+    // Animate progress bars
+    function animateProgressBars() {
+      const fills = document.querySelectorAll('.progress-fill');
+      fills.forEach((fill, index) => {
+        const width = fill.getAttribute('data-width');
         setTimeout(() => {
-          const fill = itemDiv.querySelector('.progress-bar-fill');
-          fill.style.width = subject.progress + '%';
-        }, 200 + index * 100);
+          fill.style.width = width + '%';
+        }, 200 + (index * 100));
       });
     }
-
-    // Afficher les points forts et faibles
-    function renderStrengthsWeaknesses() {
-      const strengthEl = document.getElementById('strengthList');
-      const weaknessEl = document.getElementById('weaknessList');
-
-      const strong = SUBJECTS.filter(s => s.progress >= 60).sort((a, b) => b.progress - a.progress).slice(0, 3);
-      const weak = SUBJECTS.filter(s => s.progress < 60).sort((a, b) => a.progress - b.progress).slice(0, 3);
-
-      if (strong.length > 0) {
-        strengthEl.innerHTML = strong.map(s => `
-          <div class="strength-item">
-            <span>${s.emoji}</span>
-            <span>${s.name}</span>
-          </div>
-        `).join('');
-      } else {
-        strengthEl.innerHTML = '<div class="strength-empty">Continue à t\'entraîner !</div>';
-      }
-
-      if (weak.length > 0) {
-        weaknessEl.innerHTML = weak.map(s => `
-          <div class="strength-item">
-            <span>${s.emoji}</span>
-            <span>${s.name}</span>
-          </div>
-        `).join('');
-      } else {
-        weaknessEl.innerHTML = '<div class="strength-empty">Tout va bien !</div>';
-      }
-    }
-
-    // Charger les données
-    function loadData() {
-      const userData = getUserData();
-      const globalScore = calculateGlobalScore();
-      const totalMastered = SUBJECTS.reduce((sum, s) => sum + s.mastered, 0);
-      const totalNotions = SUBJECTS.reduce((sum, s) => sum + s.total, 0);
-
-      // Header
-      if (userData && userData.prenom) {
-        document.getElementById('headerSubtitle').textContent = `${userData.prenom} — Objectif : ${userData.objectif || 15}/20`;
-      } else {
-        document.getElementById('headerSubtitle').textContent = 'Ton parcours personnalisé';
-      }
-
-      // Score global
-      animateScore(globalScore);
-      document.getElementById('masteredCount').textContent = totalMastered;
-      document.getElementById('totalCount').textContent = totalNotions;
-
-      // Info cards
-      document.getElementById('averageScore').textContent = userData?.moyenne || '12.5';
-      document.getElementById('goalScore').textContent = userData?.objectif || '15';
-
-      // Matières
-      renderSubjects();
-
-      // Points forts/faibles
-      renderStrengthsWeaknesses();
-
-      // Stats (données simulées)
-      document.getElementById('sessionsCompleted').textContent = Math.floor(Math.random() * 20) + 10;
-      document.getElementById('streakDays').textContent = Math.floor(Math.random() * 7) + 1;
-      document.getElementById('totalTime').textContent = (Math.floor(Math.random() * 15) + 5) + 'h';
-    }
-
-    // Déconnexion
-    function handleLogout() {
+    
+    // Account actions
+    document.getElementById('changePasswordBtn').addEventListener('click', () => {
+      alert('Cette fonctionnalité sera disponible très bientôt !');
+    });
+    
+    document.getElementById('contactSupportBtn').addEventListener('click', () => {
+      window.location.href = 'mailto:contact@bravoo.com';
+    });
+    
+    document.getElementById('logoutBtn').addEventListener('click', () => {
       if (confirm('Es-tu sûr(e) de vouloir te déconnecter ?')) {
         localStorage.removeItem('userData');
         window.location.href = 'index.html';
       }
-    }
-
-    // INIT
-    loadData();
-
-    // SUPABASE (à décommenter quand Benjamin aura configuré)
-    /*
-    const SUPABASE_URL = 'https://xxxxx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbxxxxxx';
+    });
     
-    async function loadDataFromSupabase() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        window.location.href = 'index.html';
-        return;
+    document.getElementById('deleteAccountBtn').addEventListener('click', () => {
+      if (confirm('⚠️ Cette action est irréversible. Es-tu vraiment sûr(e) de vouloir supprimer ton compte ?')) {
+        alert('Cette fonctionnalité sera disponible très bientôt !');
       }
-      
-      // Charger le profil
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .single();
-      
-      if (profile) {
-        document.getElementById('headerSubtitle').textContent = `${profile.prenom} — Objectif : ${profile.objectif}/20`;
-        document.getElementById('averageScore').textContent = profile.moyenne;
-        document.getElementById('goalScore').textContent = profile.objectif;
-      }
-      
-      // Charger les stats de matières
-      const { data: stats, error: statsError } = await supabase
-        .from('subject_stats')
-        .select('*')
-        .eq('user_id', session.user.id);
-      
-      if (stats) {
-        // Afficher les stats réelles
-        renderSubjects(stats);
-      }
-    }
+    });
     
-    // loadDataFromSupabase();
-    */
+    // Init animations
+    setTimeout(() => {
+      animateScore();
+      animateProgressBars();
+    }, 100);
   </script>
 </body>
 </html>
