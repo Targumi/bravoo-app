@@ -493,6 +493,18 @@
   </div>
   
   <script>
+    // Vérifier si l'utilisateur a payé
+    const urlParams = new URLSearchParams(window.location.search);
+    const justPaid = urlParams.get('paid') === 'true';
+    const hasAccess = localStorage.getItem('bravoo_paid') === 'true';
+
+    if (justPaid) {
+      localStorage.setItem('bravoo_paid', 'true');
+    } else if (!hasAccess) {
+      // Pas d'accès → rediriger vers l'onboarding
+      window.location.href = 'index.html';
+    }
+    
     // Get user data from localStorage (fallback Supabase later)
     const userData = JSON.parse(localStorage.getItem('bravoo_user') || '{}');
     const prenom = userData.prenom || 'toi';
@@ -564,58 +576,32 @@
     const preparationLabel = preparationLabels[preparation] || 'ton objectif';
     
     // Chat messages data
-    // Adapter le contenu selon le parcours
-    const matiereExemple = userMatieres[0] || { label: 'les bases', emoji: '📚' };
+    // Message de bienvenue personnalisé
+    const matieresFortesList = matieresFortes.map(k => userMatieres.find(m => m.key === k)?.label).filter(Boolean);
+    const matieresFaiblesList = matieresFaibles.map(k => userMatieres.find(m => m.key === k)?.label).filter(Boolean);
+    
+    const fortsText = matieresFortesList.length > 0 ? matieresFortesList.join(', ') : 'Non défini';
+    const faiblesText = matieresFaiblesList.length > 0 ? matieresFaiblesList.join(', ') : 'Non défini';
+    
+    const welcomeMessage = `Salut ${prenom} ! 👋
+
+Bienvenue sur Bravoo ! Je suis ton coach IA personnel et je vais t'accompagner pour réussir ${preparationLabel}.
+
+D'après ton profil :
+✅ Tes points forts : ${fortsText}
+📚 Tes lacunes : ${faiblesText}
+
+On va travailler ensemble pour renforcer tes points faibles tout en consolidant tes acquis.
+
+Prêt à commencer ?`;
     
     const messages = [
       {
         type: 'coach-text',
-        content: `Salut ${prenom} ! Aujourd'hui on travaille sur ${matiereExemple.label.toLowerCase()}. C'est une notion clé pour ${preparationLabel}. On y va ?`
+        content: welcomeMessage
       },
       {
-        type: 'action',
-        options: ['C\'est parti ! 🚀', 'Autre chose']
-      },
-      {
-        type: 'user',
-        content: 'C\'est parti ! 🚀'
-      },
-      {
-        type: 'course',
-        title: '📐 Les équations du 1er degré',
-        bullets: [
-          'Une équation c\'est une égalité avec une inconnue (x)',
-          'Pour résoudre : on isole x en faisant la même opération des deux côtés',
-          'Exemple : 2x + 3 = 7 → 2x = 4 → x = 2',
-          'Toujours vérifier : 2(2) + 3 = 7 ✓'
-        ]
-      },
-      {
-        type: 'quiz',
-        question: 'Résous : 3x - 6 = 9',
-        choices: ['x = 1', 'x = 3', 'x = 5', 'x = 15'],
-        correctIndex: 2,
-        explanation: '3x = 9 + 6 = 15, donc x = 15/3 = 5'
-      },
-      {
-        type: 'flashcards',
-        cards: [
-          { front: 'Qu\'est-ce qu\'une équation ?', back: 'Une égalité contenant une inconnue à déterminer' },
-          { front: 'Comment résoudre 5x = 20 ?', back: 'On divise des deux côtés par 5 : x = 4' },
-          { front: 'Que signifie "vérifier" une équation ?', back: 'Remplacer x par la valeur trouvée et vérifier que l\'égalité est vraie' }
-        ]
-      },
-      {
-        type: 'coach-text',
-        content: 'Bravo ! Tu as bien compris les bases. On continue avec des exercices plus durs ou tu veux revoir quelque chose ?'
-      },
-      {
-        type: 'action',
-        options: ['Exercices avancés 💪', 'Revoir les bases']
-      },
-      {
-        type: 'coach-text',
-        content: 'Le coach IA sera disponible très bientôt ! En attendant, voici un aperçu de ton expérience. 😊'
+        type: 'cta-button'
       }
     ];
     
@@ -626,8 +612,30 @@
       if (msg.type === 'coach-text') {
         const div = document.createElement('div');
         div.className = 'msg-coach';
-        div.innerHTML = `<div class="bubble-coach">${msg.content}</div>`;
+        div.innerHTML = `<div class="bubble-coach" style="white-space: pre-line;">${msg.content}</div>`;
         chatArea.appendChild(div);
+      }
+      else if (msg.type === 'cta-button') {
+        const div = document.createElement('div');
+        div.className = 'msg-coach';
+        div.innerHTML = `
+          <div style="margin-top: 8px;">
+            <button class="btn" id="ctaSessionBtn" style="width: 100%; max-width: 320px; padding: 14px 20px; border-radius: 12px; border: none; background: #1DB954; color: #FFFFFF; font-size: 15px; font-weight: 900; cursor: pointer; font-family: inherit; box-shadow: 0 8px 24px rgba(29, 185, 84, 0.3);">
+              Commencer ma première session 🚀
+            </button>
+          </div>
+        `;
+        chatArea.appendChild(div);
+        
+        // Ajouter le comportement du bouton
+        setTimeout(() => {
+          const ctaBtn = document.getElementById('ctaSessionBtn');
+          if (ctaBtn) {
+            ctaBtn.addEventListener('click', () => {
+              showToast('Le coach IA arrive très bientôt ! 🚀');
+            });
+          }
+        }, 100);
       }
       else if (msg.type === 'user') {
         const div = document.createElement('div');
@@ -786,6 +794,19 @@
     setTimeout(() => {
       chatArea.scrollTop = chatArea.scrollHeight;
     }, 100);
+    
+    // Toast function
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1DB954; color: #fff; padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; z-index: 10000; box-shadow: 0 8px 24px rgba(0,0,0,0.4);';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s';
+        toast.style.opacity = '0';
+        setTimeout(() => document.body.removeChild(toast), 300);
+      }, 3000);
+    }
   </script>
 </body>
 </html>

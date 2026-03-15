@@ -431,6 +431,18 @@
   </div>
   
   <script>
+    // Vérifier si l'utilisateur a payé
+    const urlParams = new URLSearchParams(window.location.search);
+    const justPaid = urlParams.get('paid') === 'true';
+    const hasAccess = localStorage.getItem('bravoo_paid') === 'true';
+
+    if (justPaid) {
+      localStorage.setItem('bravoo_paid', 'true');
+    } else if (!hasAccess) {
+      // Pas d'accès → rediriger vers l'onboarding
+      window.location.href = 'index.html';
+    }
+    
     // Get user data from localStorage (fallback Supabase later)
     const userData = JSON.parse(localStorage.getItem('bravoo_user') || '{}');
     const prenom = userData.prenom || 'toi';
