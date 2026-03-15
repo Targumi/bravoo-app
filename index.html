@@ -1325,9 +1325,11 @@
 
     /* Bouton retour pour navigation onboarding */
     .back-btn {
-      position: absolute;
-      top: 16px;
-      left: 16px;
+      position: relative;
+      top: auto;
+      left: auto;
+      display: block;
+      margin-bottom: 12px;
       background: none;
       border: none;
       color: var(--text-secondary);
@@ -1335,7 +1337,7 @@
       font-weight: 700;
       cursor: pointer;
       z-index: 20;
-      padding: 8px 12px;
+      padding: 4px 0;
       border-radius: 8px;
       transition: background 0.2s;
       font-family: var(--font-family);
@@ -1396,33 +1398,57 @@
     ];
 
     const BTS_LIST = [
-      'BTS Commerce International', 'BTS Comptabilité Gestion', 'BTS Communication',
-      'BTS NDRC (Négociation et Digitalisation de la Relation Client)',
       'BTS MCO (Management Commercial Opérationnel)',
-      'BTS SAM (Support à l\'Action Managériale)',
+      'BTS NDRC (Négociation et Digitalisation de la Relation Client)',
       'BTS SIO (Services Informatiques aux Organisations)',
-      'BTS Tourisme', 'BTS Banque', 'BTS Assurance', 'BTS Diététique',
-      'BTS ESF (Économie Sociale Familiale)', 'BTS SP3S',
-      'BTS Électrotechnique', 'BTS CRSA', 'BTS Bâtiment', 'BTS Agroalimentaire'
+      'BTS CG (Comptabilité et Gestion)',
+      'BTS SAM (Support à l\'Action Managériale)',
+      'BTS Communication',
+      'BTS Commerce International',
+      'BTS Tourisme',
+      'BTS Banque',
+      'BTS Assurance',
+      'BTS SP3S (Services et Prestations des Secteurs Sanitaire et Social)',
+      'BTS ESF (Économie Sociale Familiale)',
+      'BTS Électrotechnique',
+      'BTS Diététique',
+      'BTS Professions Immobilières'
     ];
 
     const BUT_LIST = [
-      'BUT Informatique', 'BUT GEA (Gestion des Entreprises et des Administrations)',
+      'BUT Informatique',
+      'BUT GEA (Gestion des Entreprises et des Administrations)',
       'BUT TC (Techniques de Commercialisation)',
       'BUT MMI (Métiers du Multimédia et de l\'Internet)',
-      'BUT Génie Civil', 'BUT Génie Mécanique', 'BUT Génie Électrique',
-      'BUT Chimie', 'BUT Biologie', 'BUT GACO', 'BUT Carrières Juridiques',
+      'BUT Génie Civil',
+      'BUT Génie Mécanique et Productique',
+      'BUT Génie Électrique et Informatique Industrielle',
+      'BUT Chimie',
+      'BUT Carrières Juridiques',
       'BUT Carrières Sociales'
     ];
 
     const CONCOURS_LIST = [
-      'CRPE (professeur des écoles)', 'Infirmier (IFSI)', 'Police', 'Gendarmerie',
-      'Douanes', 'Auxiliaire de puériculture', 'Aide-soignant'
+      'CRPE (Professeur des écoles)',
+      'Police nationale (Gardien de la paix)',
+      'Gendarmerie (Sous-officier)',
+      'Aide-soignant',
+      'Auxiliaire de puériculture',
+      'Infirmier (IFSI)',
+      'Douanes',
+      'Sapeur-pompier professionnel'
     ];
 
     const LANGUES_LIST = [
-      'TOEIC', 'TOEFL', 'DELF/DALF', 'Anglais général', 'Espagnol', 'Allemand',
-      'Italien', 'Portugais', 'Chinois', 'Japonais', 'Arabe'
+      'TOEIC',
+      'TOEFL',
+      'DELF/DALF',
+      'Cambridge (B2 First / C1 Advanced)',
+      'Anglais général',
+      'Espagnol',
+      'Allemand',
+      'Italien',
+      'Portugais'
     ];
 
     const PERMIS_LIST = [
@@ -1856,10 +1882,9 @@
     // ========================================
     let state = {
       prenom: '',
-      preparation: '',        // 'brevet', 'bac', 'bts', 'but', 'concours', 'code', 'langue', 'orthographe', 'primaire', 'autre'
+      preparation: '',        // 'brevet', 'bac', 'bts', 'but', 'concours', 'code', 'langue', 'orthographe', 'primaire'
       sousChoix: '',          // classe, filière, BTS spécifique, etc.
       sousChoix2: '',         // ex: spécialités bac
-      autreTexte: '',         // si "autre" est sélectionné
       matieres: [],           // liste des matières adaptées au parcours
       matieresFortes: [],
       matieresFaibles: [],
@@ -1899,18 +1924,16 @@
         steps.push('langue_choix');
       } else if (state.preparation === 'primaire') {
         steps.push('primaire_classe');
-      } else if (state.preparation === 'autre') {
-        steps.push('autre_texte');
       }
 
-      // Ajouter les étapes communes (sauf pour orthographe et autre qui skip certaines)
-      if (!['orthographe', 'autre'].includes(state.preparation)) {
+      // Ajouter les étapes communes (sauf pour orthographe qui skip certaines)
+      if (state.preparation !== 'orthographe') {
         steps.push('moyenne');
       }
       
       steps.push('matieres_fortes', 'matieres_faibles');
       
-      if (!['orthographe', 'autre'].includes(state.preparation)) {
+      if (state.preparation !== 'orthographe') {
         steps.push('objectif');
       }
       
@@ -2021,9 +2044,6 @@
         pool = ALL_QUIZ_QUESTIONS.langue;
       } else if (preparation === 'orthographe') {
         pool = ALL_QUIZ_QUESTIONS.orthographe;
-      } else {
-        // Autre → mélange college/lycee
-        pool = [...ALL_QUIZ_QUESTIONS.college, ...ALL_QUIZ_QUESTIONS.lycee];
       }
 
       const count = Math.min(4, pool.length);
@@ -2073,9 +2093,6 @@
           break;
         case 'primaire_classe':
           renderPrimaireClasseStep();
-          break;
-        case 'autre_texte':
-          renderAutreTexteStep();
           break;
         case 'moyenne':
           renderMoyenneStep();
@@ -2209,8 +2226,7 @@
       const card = document.getElementById('card');
       const filieres = [
         'Bac Général',
-        'Bac Techno (STMG, STI2D, ST2S, STL, STHR, STD2A, S2TMD)',
-        'Bac Pro'
+        'Bac Techno (STMG, STI2D, ST2S, STL, STHR, STD2A, S2TMD)'
       ];
       card.innerHTML = `
         <div class="card-content">
@@ -2301,22 +2317,6 @@
           });
           btsList.appendChild(chip);
         });
-        
-        // Option "Autre BTS"
-        const autreChip = document.createElement('div');
-        autreChip.className = 'chip' + (state.sousChoix && !BTS_LIST.includes(state.sousChoix) && state.sousChoix !== '' ? ' selected' : '');
-        autreChip.innerHTML = `<span class="emoji">➕</span><span>Autre BTS (précise ci-dessus)</span>`;
-        autreChip.addEventListener('click', () => {
-          const custom = searchBTS.value.trim();
-          if (custom) {
-            state.sousChoix = custom;
-            continueBtn.disabled = false;
-            renderBTSList(filter);
-          } else {
-            alert('Tape le nom de ton BTS dans la barre de recherche puis clique sur "Autre BTS"');
-          }
-        });
-        btsList.appendChild(autreChip);
       }
       
       renderBTSList();
@@ -2368,22 +2368,6 @@
           });
           butList.appendChild(chip);
         });
-        
-        // Option "Autre BUT"
-        const autreChip = document.createElement('div');
-        autreChip.className = 'chip' + (state.sousChoix && !BUT_LIST.includes(state.sousChoix) && state.sousChoix !== '' ? ' selected' : '');
-        autreChip.innerHTML = `<span class="emoji">➕</span><span>Autre BUT (précise ci-dessus)</span>`;
-        autreChip.addEventListener('click', () => {
-          const custom = searchBUT.value.trim();
-          if (custom) {
-            state.sousChoix = custom;
-            continueBtn.disabled = false;
-            renderBUTList(filter);
-          } else {
-            alert('Tape le nom de ton BUT dans la barre de recherche puis clique sur "Autre BUT"');
-          }
-        });
-        butList.appendChild(autreChip);
       }
       
       renderBUTList();
@@ -2406,15 +2390,9 @@
           <h2 class="heading">Quel concours ?</h2>
           <div class="chips-list" id="concoursList"></div>
         </div>
-        <div class="card-action">
-          <input type="text" class="input" id="autreConcoursInput" placeholder="Autre concours (précise)" style="margin-bottom: 8px; display: none;">
-          <button class="btn" id="continueBtn" disabled>Continuer</button>
-        </div>
       `;
       
       const concoursList = document.getElementById('concoursList');
-      const autreInput = document.getElementById('autreConcoursInput');
-      const continueBtn = document.getElementById('continueBtn');
       
       CONCOURS_LIST.forEach(c => {
         const chip = document.createElement('div');
@@ -2422,30 +2400,10 @@
         chip.innerHTML = `<span class="emoji">📝</span><span>${c}</span>`;
         chip.addEventListener('click', () => {
           state.sousChoix = c;
-          autreInput.style.display = 'none';
-          continueBtn.disabled = false;
           setTimeout(goNext, 300);
         });
         concoursList.appendChild(chip);
       });
-      
-      // Option "Autre"
-      const autreChip = document.createElement('div');
-      autreChip.className = 'chip';
-      autreChip.innerHTML = `<span class="emoji">➕</span><span>Autre</span>`;
-      autreChip.addEventListener('click', () => {
-        autreInput.style.display = 'block';
-        autreInput.focus();
-      });
-      concoursList.appendChild(autreChip);
-      
-      autreInput.addEventListener('input', (e) => {
-        state.sousChoix = e.target.value.trim();
-        continueBtn.disabled = !state.sousChoix;
-      });
-      
-      continueBtn.addEventListener('click', goNext);
-      if (state.sousChoix) continueBtn.disabled = false;
     }
 
     function renderCodePermisStep() {
@@ -2485,15 +2443,9 @@
           <h2 class="heading">Quelle langue ?</h2>
           <div class="chips-list" id="langueList"></div>
         </div>
-        <div class="card-action">
-          <input type="text" class="input" id="autreLangueInput" placeholder="Autre langue (précise)" style="margin-bottom: 8px; display: none;">
-          <button class="btn" id="continueBtn" disabled>Continuer</button>
-        </div>
       `;
       
       const langueList = document.getElementById('langueList');
-      const autreInput = document.getElementById('autreLangueInput');
-      const continueBtn = document.getElementById('continueBtn');
       
       LANGUES_LIST.forEach(l => {
         const chip = document.createElement('div');
@@ -2501,30 +2453,10 @@
         chip.innerHTML = `<span class="emoji">🌍</span><span>${l}</span>`;
         chip.addEventListener('click', () => {
           state.sousChoix = l;
-          autreInput.style.display = 'none';
-          continueBtn.disabled = false;
           setTimeout(goNext, 300);
         });
         langueList.appendChild(chip);
       });
-      
-      // Option "Autre"
-      const autreChip = document.createElement('div');
-      autreChip.className = 'chip';
-      autreChip.innerHTML = `<span class="emoji">➕</span><span>Autre</span>`;
-      autreChip.addEventListener('click', () => {
-        autreInput.style.display = 'block';
-        autreInput.focus();
-      });
-      langueList.appendChild(autreChip);
-      
-      autreInput.addEventListener('input', (e) => {
-        state.sousChoix = e.target.value.trim();
-        continueBtn.disabled = !state.sousChoix;
-      });
-      
-      continueBtn.addEventListener('click', goNext);
-      if (state.sousChoix) continueBtn.disabled = false;
     }
 
     function renderPrimaireClasseStep() {
@@ -2551,36 +2483,6 @@
         });
         classeList.appendChild(chip);
       });
-    }
-
-    function renderAutreTexteStep() {
-      const card = document.getElementById('card');
-      card.innerHTML = `
-        <div class="card-content">
-          <button class="back-btn" onclick="goBack()">← Retour</button>
-          <div class="step-label">
-            <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
-          </div>
-          <h2 class="heading">Qu'est-ce que tu prépares exactement ?</h2>
-          <p class="subtitle">Décris-nous ton objectif !</p>
-          <input type="text" class="input" id="autreInput" placeholder="Ex: CAP, certification..." autofocus>
-        </div>
-        <div class="card-action">
-          <button class="btn" id="continueBtn" disabled>Continuer</button>
-        </div>
-      `;
-      const autreInput = document.getElementById('autreInput');
-      const continueBtn = document.getElementById('continueBtn');
-      autreInput.value = state.autreTexte;
-      autreInput.addEventListener('input', (e) => {
-        state.autreTexte = e.target.value.trim();
-        continueBtn.disabled = !state.autreTexte;
-      });
-      autreInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && state.autreTexte) goNext();
-      });
-      continueBtn.addEventListener('click', goNext);
-      if (state.autreTexte) continueBtn.disabled = false;
     }
 
     function renderMoyenneStep() {
