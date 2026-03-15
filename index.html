@@ -9,11 +9,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   
-  <!-- Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase SDK (async pour ne pas bloquer le rendu) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
   
-  <!-- Stripe SDK -->
-  <script src="https://js.stripe.com/v3/"></script>
+  <!-- Stripe SDK (async pour ne pas bloquer le rendu) -->
+  <script src="https://js.stripe.com/v3/" async></script>
   <style>
     /* ========================================
        RESET & BASE
@@ -3306,9 +3306,23 @@
     // ========================================
     // INIT
     // ========================================
-    generateSteps();
-    updateProgress();
-    renderStep();
+    function initApp() {
+      try {
+        generateSteps();
+        updateProgress();
+        renderStep();
+      } catch(e) {
+        console.error('Init error:', e);
+        document.getElementById('card').innerHTML = '<div class="card-content"><h2 class="heading">Oups ! Recharge la page 🔄</h2><p class="subtitle">Si le problème persiste, essaie en navigation privée.</p></div>';
+      }
+    }
+    
+    // S'assurer que le DOM et les scripts sont prêts
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
   </script>
 </body>
 </html>
