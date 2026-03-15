@@ -1322,6 +1322,27 @@
     .mb-16 {
       margin-bottom: 16px;
     }
+
+    /* Bouton retour pour navigation onboarding */
+    .back-btn {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 20;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: background 0.2s;
+      font-family: var(--font-family);
+    }
+    .back-btn:hover {
+      background: rgba(255,255,255,0.05);
+    }
   </style>
 </head>
 <body>
@@ -1455,8 +1476,9 @@
       bts_sio: [
         { key: 'culture_generale', label: 'Culture générale', emoji: '📚' },
         { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' },
+        { key: 'cejm', label: 'Culture éco/juridique/managériale (CEJM)', emoji: '💼' },
         { key: 'mathematiques', label: 'Maths', emoji: '📐' },
-        { key: 'algorithme', label: 'Algorithme appliqué', emoji: '💻' },
+        { key: 'algorithme', label: 'Support et mise à disposition de services informatiques', emoji: '💻' },
         { key: 'si', label: 'SI (support système/réseau OU solutions logicielles)', emoji: '🖥️' },
         { key: 'cybersecurite', label: 'Cybersécurité', emoji: '🔒' }
       ],
@@ -1464,13 +1486,14 @@
         { key: 'culture_generale', label: 'Culture générale', emoji: '📚' },
         { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' },
         { key: 'cejm', label: 'Culture éco/juridique/managériale', emoji: '💼' },
-        { key: 'relation_client_distance', label: 'Relation client à distance', emoji: '📞' },
-        { key: 'digitalisation', label: 'Digitalisation', emoji: '💻' },
-        { key: 'animation_reseau', label: 'Animation réseau', emoji: '🌐' }
+        { key: 'rcnv', label: 'Relation client et négociation-vente', emoji: '🤝' },
+        { key: 'relation_client_distance', label: 'Relation client à distance et digitalisation', emoji: '📞' },
+        { key: 'animation_reseau', label: 'Relation client et animation de réseaux', emoji: '🌐' }
       ],
       bts_generic: [
         { key: 'culture_generale', label: 'Culture générale', emoji: '📚' },
         { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' },
+        { key: 'cejm', label: 'CEJM ou Mathématiques (selon BTS)', emoji: '💼' },
         { key: 'matiere_pro1', label: 'Matière pro 1', emoji: '📋' },
         { key: 'matiere_pro2', label: 'Matière pro 2', emoji: '📋' },
         { key: 'matiere_pro3', label: 'Matière pro 3', emoji: '📋' }
@@ -1775,6 +1798,56 @@
           correctAnswerIndex: 2,
           explanation: 'Le pluriel irrégulier de "child" est "children".'
         }
+      ],
+      orthographe: [
+        {
+          id: 'orth1',
+          subject: 'Orthographe',
+          prompt: 'Quelle phrase est correcte ?',
+          choices: ['Quel que soit ton choix', 'Quelque soit ton choix', 'Quelques soit ton choix', 'Quels que soit ton choix'],
+          correctAnswerIndex: 0,
+          explanation: '"Quel que soit" s\'écrit en trois mots. "Quel" s\'accorde avec le sujet du verbe "soit".'
+        },
+        {
+          id: 'orth2',
+          subject: 'Conjugaison',
+          prompt: 'Complétez : "Il faut que tu ... plus attention."',
+          choices: ['fais', 'fait', 'fasses', 'fasse'],
+          correctAnswerIndex: 2,
+          explanation: 'Après "il faut que", on utilise le subjonctif présent : "que tu fasses".'
+        },
+        {
+          id: 'orth3',
+          subject: 'Grammaire',
+          prompt: '"Les efforts qu\'elle a ... ont payé." Choisissez :',
+          choices: ['fait', 'faits', 'faites', 'fais'],
+          correctAnswerIndex: 1,
+          explanation: 'Le participe passé "fait" s\'accorde avec le COD "qu\'" (= les efforts, masculin pluriel) placé avant : "faits".'
+        },
+        {
+          id: 'orth4',
+          subject: 'Orthographe',
+          prompt: 'Quelle est la bonne orthographe ?',
+          choices: ['Ils se sont téléphoné', 'Ils se sont téléphonés', 'Ils se sont téléphonées', 'Ils se sont telephonés'],
+          correctAnswerIndex: 0,
+          explanation: '"Téléphoner" est un verbe transitif indirect (téléphoner À quelqu\'un). Le participe passé ne s\'accorde pas : "Ils se sont téléphoné".'
+        },
+        {
+          id: 'orth5',
+          subject: 'Vocabulaire',
+          prompt: 'Quel mot est correct ?',
+          choices: ['Parmis', 'Parmi', 'Parmit', 'Parmis'],
+          correctAnswerIndex: 1,
+          explanation: '"Parmi" s\'écrit sans "s" final (contrairement à "hormis").'
+        },
+        {
+          id: 'orth6',
+          subject: 'Conjugaison',
+          prompt: '"Quand tu ... à Paris, appelle-moi."',
+          choices: ['viendras', 'viendra', 'viendrais', 'viendrait'],
+          correctAnswerIndex: 0,
+          explanation: 'Futur simple, 2e personne du singulier : "tu viendras". Attention à ne pas confondre avec le conditionnel "viendrais".'
+        }
       ]
     };
 
@@ -1800,6 +1873,7 @@
 
     let currentStepIndex = 0;
     let dynamicSteps = [];
+    let stepHistory = [];
 
     // ========================================
     // DYNAMIC STEPS GENERATION
@@ -1871,7 +1945,16 @@
       }
 
       if (currentStepIndex < dynamicSteps.length - 1) {
+        // Sauvegarder l'état courant avant d'avancer
+        stepHistory.push(currentStepIndex);
         goToStep(currentStepIndex + 1);
+      }
+    }
+
+    function goBack() {
+      if (stepHistory.length > 0) {
+        currentStepIndex = stepHistory.pop();
+        renderCurrentStep();
       }
     }
 
@@ -1936,8 +2019,10 @@
         pool = ALL_QUIZ_QUESTIONS.code;
       } else if (preparation === 'langue') {
         pool = ALL_QUIZ_QUESTIONS.langue;
+      } else if (preparation === 'orthographe') {
+        pool = ALL_QUIZ_QUESTIONS.orthographe;
       } else {
-        // Orthographe, autre → mélange college/lycee
+        // Autre → mélange college/lycee
         pool = [...ALL_QUIZ_QUESTIONS.college, ...ALL_QUIZ_QUESTIONS.lycee];
       }
 
@@ -2072,6 +2157,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2098,6 +2184,7 @@
       const classes = ['6ème', '5ème', '4ème', '3ème'];
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2127,6 +2214,7 @@
       ];
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2152,6 +2240,7 @@
       const classes = ['Seconde', 'Première', 'Terminale'];
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2176,6 +2265,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2242,6 +2332,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2308,6 +2399,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2360,6 +2452,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2385,6 +2478,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2438,6 +2532,7 @@
       const classes = ['CM1', 'CM2'];
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2462,6 +2557,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2491,6 +2587,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2535,6 +2632,7 @@
       
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2572,6 +2670,7 @@
       const options = getObjectifOptions(state.moyenne || 10);
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="step-label">
             <span>Étape ${currentStepIndex + 1}/${dynamicSteps.length}</span>
           </div>
@@ -2629,6 +2728,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="loading-container">
             <div class="spinner"></div>
             <div class="loading-msg" id="loadingMsg"></div>
@@ -2677,6 +2777,7 @@
 
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="quiz-header">
             <div class="step-label" style="margin-bottom: 0;">Question ${currentQuizIndex + 1}/${state.quizQuestions.length}</div>
             <div class="quiz-badge">${q.subject}</div>
@@ -2760,6 +2861,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="text-center mb-16">
             <h2 class="heading" style="margin-bottom: 10px; font-size: 20px;">Ok, merci pour tes réponses ! 🎉</h2>
             <p style="color: var(--text-primary); font-size: 15px; line-height: 1.6; margin: 0 0 6px; font-weight: 600;">
@@ -2815,6 +2917,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="text-center mb-16">
             <div style="font-size: 40px; margin-bottom: 10px;">😊</div>
             <h2 class="heading" style="margin-bottom: 8px; font-size: 20px;">Content que ça te plaise :)</h2>
@@ -2849,6 +2952,7 @@
       const card = document.getElementById('card');
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="text-center mb-16">
             <h2 class="heading" style="margin-bottom: 8px; font-size: 20px;">C'est tout bon !</h2>
             <p class="subtitle">Crée-toi un mot de passe, comme "Objectifbrevet" ou "Monchiencestlemeilleur", bref on te laisse choisir :)</p>
@@ -2901,6 +3005,7 @@
       
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="profile-loading-container">
             <div class="circular-progress">
               <svg viewBox="0 0 120 120">
@@ -3009,6 +3114,7 @@
 
       card.innerHTML = `
         <div class="card-content">
+          <button class="back-btn" onclick="goBack()">← Retour</button>
           <div class="paywall-hero">
             <div class="emoji">🎉</div>
             <h2 class="title">${state.prenom}, ton espace est prêt !</h2>
