@@ -1926,14 +1926,16 @@
         steps.push('primaire_classe');
       }
 
-      // Ajouter les étapes communes (sauf pour orthographe qui skip certaines)
-      if (state.preparation !== 'orthographe') {
+      // Parcours qui n'ont PAS de moyenne scolaire /20
+      const skipMoyenne = ['orthographe', 'code', 'langue', 'concours'];
+      
+      if (!skipMoyenne.includes(state.preparation)) {
         steps.push('moyenne');
       }
       
       steps.push('matieres_fortes', 'matieres_faibles');
       
-      if (state.preparation !== 'orthographe') {
+      if (!skipMoyenne.includes(state.preparation)) {
         steps.push('objectif');
       }
       
@@ -1977,7 +1979,7 @@
     function goBack() {
       if (stepHistory.length > 0) {
         currentStepIndex = stepHistory.pop();
-        renderCurrentStep();
+        goToStep(currentStepIndex);
       }
     }
 
