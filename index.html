@@ -1393,7 +1393,15 @@
     // ========================================
     const SUPABASE_URL = 'https://yqcdkoqmvzssfweerpjs.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2Rrb3Ftdnpzc2Z3ZWVycGpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDk0ODMsImV4cCI6MjA4OTEyNTQ4M30.n9_bPak9WIHGmGdastqGUPfiomAfFndKNCJFJmP4YwU';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let supabaseClient = null;
+    try {
+      if (window.supabase && window.supabase.createClient) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+    } catch (e) {
+      console.warn('Supabase SDK non disponible, fallback localStorage');
+    }
+    const supabase = supabaseClient;
     
     const STRIPE_PUBLISHABLE_KEY = 'pk_test_51NZMILD7d5GW1E679twtoO8U3tnvq6BmxC2XFmHsRJgzMuHA8n5KtsY6enxz3OcnbsT22h1t9L5kGftyP93PdIQd00vTvxmGmu';
     const STRIPE_PRICE_ID = 'price_1TB8pGD7d5GW1E67y7tBzOaF';
@@ -1923,6 +1931,22 @@
     
     async function signUpUser() {
       try {
+        if (!supabase) {
+          console.warn('Supabase non disponible, fallback localStorage');
+          localStorage.setItem('bravoo_registered', 'true');
+          localStorage.setItem('bravoo_user', JSON.stringify({
+            prenom: state.prenom,
+            preparation: state.preparation,
+            sousChoix: state.sousChoix,
+            sousChoix2: state.sousChoix2,
+            matieresFortes: state.matieresFortes,
+            matieresFaibles: state.matieresFaibles,
+            moyenne: state.moyenne,
+            objectif: state.objectif,
+            quizScore: calculateQuizScore()
+          }));
+          return true;
+        }
         // SignUp sans confirmation email
         const { data, error } = await supabase.auth.signUp({
           email: state.email,
