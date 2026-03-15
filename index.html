@@ -1087,12 +1087,13 @@
       width: 120px;
       height: 120px;
       margin: 0 auto 16px;
-      transform: rotate(-90deg);
     }
 
     .circular-progress circle {
       fill: none;
       stroke-width: 8;
+      transform: rotate(-90deg);
+      transform-origin: center;
     }
 
     .circular-progress .circle-bg {
@@ -1370,8 +1371,7 @@
       { value: 'code', label: 'Le Code de la route', emoji: '🚗' },
       { value: 'langue', label: 'Une langue (TOEIC, DELF...)', emoji: '🌍' },
       { value: 'orthographe', label: 'Orthographe / Voltaire', emoji: '✏️' },
-      { value: 'primaire', label: 'Primaire (CM1-CM2)', emoji: '📖' },
-      { value: 'autre', label: 'Autre chose', emoji: '➕' }
+      { value: 'primaire', label: 'Primaire (CM1-CM2)', emoji: '📖' }
     ];
 
     const BTS_LIST = [
@@ -1941,7 +1941,7 @@
         pool = [...ALL_QUIZ_QUESTIONS.college, ...ALL_QUIZ_QUESTIONS.lycee];
       }
 
-      const count = Math.min(6, pool.length);
+      const count = Math.min(4, pool.length);
       const shuffled = pool.sort(() => Math.random() - 0.5);
       return shuffled.slice(0, count);
     }
@@ -2683,6 +2683,7 @@
           </div>
           <h2 class="heading" style="font-size: 17px;">${q.prompt}</h2>
           <div class="quiz-choices" id="quizChoices"></div>
+          ${!showCorrection ? '<button class="skip-btn" id="skipBtn" style="background: none; border: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary); padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 12px; width: 100%; transition: background 0.2s; font-family: var(--font-family);">Je ne sais pas →</button>' : ''}
           <div id="quizExplanation"></div>
           <div class="quiz-progress">
             <div class="quiz-progress-fill" style="width: ${((currentQuizIndex + 1) / state.quizQuestions.length) * 100}%;"></div>
@@ -2692,6 +2693,17 @@
 
       const choicesDiv = document.getElementById('quizChoices');
       const explanationDiv = document.getElementById('quizExplanation');
+      const skipBtn = document.getElementById('skipBtn');
+
+      if (skipBtn) {
+        skipBtn.addEventListener('click', () => {
+          // Marquer comme incorrecte et passer à la suite
+          selectedAnswer = -1; // Aucune réponse
+          state.quizAnswers[q.id] = -1;
+          currentQuizIndex++;
+          renderQuiz();
+        });
+      }
 
       q.choices.forEach((choice, idx) => {
         const choiceDiv = document.createElement('div');
@@ -2992,14 +3004,6 @@
     function renderPaywall() {
       const card = document.getElementById('card');
 
-      // Places restantes (80-200)
-      const placesKey = 'bravoo_paywall_places';
-      let places = localStorage.getItem(placesKey);
-      if (!places) {
-        places = Math.floor(Math.random() * 121) + 80; // 80-200
-        localStorage.setItem(placesKey, places);
-      }
-
       const preparationLabel = PREPARATIONS.find(p => p.value === state.preparation)?.label || state.preparation;
       const matieresToRenforcer = state.matieresFaibles.map(k => state.matieres.find(s => s.key === k)?.label || k).join(', ') || 'tes matières';
 
@@ -3046,9 +3050,8 @@
           </div>
 
           <div class="paywall-offer">
-            <div class="paywall-badge">🔥 OFFRE LIMITÉE</div>
-            <div class="paywall-places">
-              Plus que <strong>${places} places</strong> disponibles ce mois-ci
+            <div class="urgency-badge" style="text-align: center; color: var(--accent); font-weight: 700; font-size: 14px; margin-bottom: 12px;">
+              🔥 Offre de lancement : -70% jusqu'au 31 mars 2026
             </div>
             <div class="paywall-pricing">
               <div class="paywall-old-price">12,99€/semaine</div>
