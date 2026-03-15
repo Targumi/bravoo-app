@@ -364,52 +364,8 @@
       
       <!-- Subjects -->
       <div class="section-title">Par matière</div>
-      <div class="subjects-list">
-        <div class="subject-item">
-          <div class="subject-header">
-            <div class="subject-name">📐 Mathématiques</div>
-            <div class="subject-score">65%</div>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" data-width="65"></div>
-          </div>
-        </div>
-        <div class="subject-item">
-          <div class="subject-header">
-            <div class="subject-name">📖 Français</div>
-            <div class="subject-score">52%</div>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" data-width="52"></div>
-          </div>
-        </div>
-        <div class="subject-item">
-          <div class="subject-header">
-            <div class="subject-name">🌍 Histoire-Géo</div>
-            <div class="subject-score">48%</div>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" data-width="48"></div>
-          </div>
-        </div>
-        <div class="subject-item">
-          <div class="subject-header">
-            <div class="subject-name">🔬 Sciences</div>
-            <div class="subject-score">61%</div>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" data-width="61"></div>
-          </div>
-        </div>
-        <div class="subject-item">
-          <div class="subject-header">
-            <div class="subject-name">🇬🇧 Anglais</div>
-            <div class="subject-score">70%</div>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" data-width="70"></div>
-          </div>
-        </div>
+      <div class="subjects-list" id="subjectsList">
+        <!-- Subjects will be injected by JS -->
       </div>
       
       <!-- Points forts vs À travailler -->
@@ -475,14 +431,143 @@
   </div>
   
   <script>
-    // Get user data
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    const prenom = userData.firstName || 'toi';
-    const goal = userData.goal || 15;
+    // Get user data from localStorage (fallback Supabase later)
+    const userData = JSON.parse(localStorage.getItem('bravoo_user') || '{}');
+    const prenom = userData.prenom || 'toi';
+    const preparation = userData.preparation || 'brevet';
+    const matieresFortes = userData.matieresFortes || [];
+    const matieresFaibles = userData.matieresFaibles || [];
+    const moyenne = userData.moyenne || 12;
+    const objectif = userData.objectif || 15;
+    
+    // Configuration des matières par préparation (copie depuis index.html)
+    const MATIERES_CONFIG = {
+      brevet: [
+        { key: 'mathematiques', label: 'Mathématiques', emoji: '📐' },
+        { key: 'francais', label: 'Français', emoji: '📖' },
+        { key: 'histoire_geo_emc', label: 'Histoire-Géo/EMC', emoji: '🌍' },
+        { key: 'sciences', label: 'Sciences', emoji: '🔬' },
+        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' }
+      ],
+      bac: [
+        { key: 'mathematiques', label: 'Mathématiques', emoji: '📐' },
+        { key: 'francais', label: 'Français', emoji: '📖' },
+        { key: 'philo', label: 'Philosophie', emoji: '🤔' },
+        { key: 'histoire_geo', label: 'Histoire-Géo', emoji: '🗺️' },
+        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' }
+      ],
+      code: [
+        { key: 'code_route', label: 'Code de la route', emoji: '🚦' },
+        { key: 'signalisation', label: 'Signalisation', emoji: '🚸' },
+        { key: 'priorites', label: 'Règles de priorité', emoji: '⚠️' },
+        { key: 'agglomeration', label: 'Conduite en agglomération', emoji: '🏙️' },
+        { key: 'autoroute', label: 'Autoroute', emoji: '🛣️' }
+      ],
+      langue: [
+        { key: 'grammaire', label: 'Grammaire', emoji: '📖' },
+        { key: 'vocabulaire', label: 'Vocabulaire', emoji: '📚' },
+        { key: 'comprehension_ecrite', label: 'Compréhension écrite', emoji: '📄' },
+        { key: 'comprehension_orale', label: 'Compréhension orale', emoji: '🎧' },
+        { key: 'expression', label: 'Expression', emoji: '✍️' }
+      ],
+      orthographe: [
+        { key: 'orthographe', label: 'Orthographe', emoji: '✏️' },
+        { key: 'grammaire', label: 'Grammaire', emoji: '📖' },
+        { key: 'conjugaison', label: 'Conjugaison', emoji: '🔄' },
+        { key: 'vocabulaire', label: 'Vocabulaire', emoji: '📚' }
+      ],
+      primaire: [
+        { key: 'francais', label: 'Français', emoji: '📖' },
+        { key: 'mathematiques', label: 'Mathématiques', emoji: '🔢' },
+        { key: 'sciences', label: 'Sciences', emoji: '🔬' },
+        { key: 'histoire_geo', label: 'Histoire-Géo', emoji: '🌍' }
+      ]
+    };
+    
+    // Obtenir les matières du parcours utilisateur
+    const userMatieres = MATIERES_CONFIG[preparation] || MATIERES_CONFIG.brevet;
     
     // Update header
-    document.getElementById('headerSubtitle').textContent = `${prenom} — Objectif : ${goal}/20`;
-    document.getElementById('objectifValue').innerHTML = `${goal}<span style="font-size: 16px; color: #B3B3B3;">/20</span>`;
+    const hasObjectif = objectif && !['code', 'langue', 'orthographe', 'concours'].includes(preparation);
+    if (hasObjectif) {
+      document.getElementById('headerSubtitle').textContent = `${prenom} — Objectif : ${objectif}/20`;
+      document.getElementById('objectifValue').innerHTML = `${objectif}<span style="font-size: 16px; color: #B3B3B3;">/20</span>`;
+    } else {
+      document.getElementById('headerSubtitle').textContent = `${prenom}`;
+      // Cacher la carte objectif si pas de moyenne/objectif
+      const objectifCard = document.querySelector('.info-cards .info-card:nth-child(2)');
+      if (objectifCard) objectifCard.style.display = 'none';
+    }
+    
+    // Update moyenne actuelle
+    if (moyenne) {
+      document.querySelector('.info-card:nth-child(1) .info-card-value').innerHTML = `${moyenne}<span style="font-size: 16px; color: #B3B3B3;">/20</span>`;
+    } else {
+      document.querySelector('.info-card:nth-child(1) .info-card-label').textContent = 'NIVEAU';
+      document.querySelector('.info-card:nth-child(1) .info-card-value').textContent = 'Débutant';
+    }
+    
+    // Générer les matières dynamiquement
+    const subjectsList = document.getElementById('subjectsList');
+    
+    // Scores factices pour chaque matière (progression aléatoire mais cohérente)
+    const subjectScores = {};
+    userMatieres.forEach((matiere, idx) => {
+      const baseScore = 45 + Math.floor(Math.random() * 30);
+      const isFort = matieresFortes.includes(matiere.key);
+      const isFaible = matieresFaibles.includes(matiere.key);
+      
+      let score = baseScore;
+      if (isFort) score = Math.min(baseScore + 15, 85);
+      if (isFaible) score = Math.max(baseScore - 10, 35);
+      
+      subjectScores[matiere.key] = score;
+      
+      const subjectItem = document.createElement('div');
+      subjectItem.className = 'subject-item';
+      subjectItem.innerHTML = `
+        <div class="subject-header">
+          <div class="subject-name">${matiere.emoji} ${matiere.label}</div>
+          <div class="subject-score">${score}%</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" data-width="${score}"></div>
+        </div>
+      `;
+      subjectsList.appendChild(subjectItem);
+    });
+    
+    // Adapter les points forts et faibles
+    const fortsContainer = document.querySelector('.points-col:nth-child(1) .points-list');
+    const faiblesContainer = document.querySelector('.points-col:nth-child(2) .points-list');
+    
+    fortsContainer.innerHTML = '';
+    faiblesContainer.innerHTML = '';
+    
+    const matieresFortesList = matieresFortes.map(k => userMatieres.find(m => m.key === k)).filter(Boolean);
+    const matieresFaiblesList = matieresFaibles.map(k => userMatieres.find(m => m.key === k)).filter(Boolean);
+    
+    if (matieresFortesList.length > 0) {
+      matieresFortesList.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'points-item';
+        item.innerHTML = `<span class="points-bullet"></span><span>${m.label}</span>`;
+        fortsContainer.appendChild(item);
+      });
+    } else {
+      fortsContainer.innerHTML = '<div class="points-item" style="color: #727272;">Non défini</div>';
+    }
+    
+    if (matieresFaiblesList.length > 0) {
+      matieresFaiblesList.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'points-item';
+        item.innerHTML = `<span class="points-bullet"></span><span>${m.label}</span>`;
+        faiblesContainer.appendChild(item);
+      });
+    } else {
+      faiblesContainer.innerHTML = '<div class="points-item" style="color: #727272;">Non défini</div>';
+    }
     
     // Animate score circle
     const targetScore = 58;

@@ -8,6 +8,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Stripe SDK -->
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
     /* ========================================
        RESET & BASE
@@ -1383,6 +1389,16 @@
 
   <script>
     // ========================================
+    // SUPABASE & STRIPE CONFIG
+    // ========================================
+    const SUPABASE_URL = 'https://yqcdkoqmvzssfweerpjs.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxY2Rrb3Ftdnpzc2Z3ZWVycGpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDk0ODMsImV4cCI6MjA4OTEyNTQ4M30.n9_bPak9WIHGmGdastqGUPfiomAfFndKNCJFJmP4YwU';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    const STRIPE_PUBLISHABLE_KEY = 'pk_test_51NZMILD7d5GW1E679twtoO8U3tnvq6BmxC2XFmHsRJgzMuHA8n5KtsY6enxz3OcnbsT22h1t9L5kGftyP93PdIQd00vTvxmGmu';
+    const STRIPE_PRICE_ID = 'price_1TB8pGD7d5GW1E67y7tBzOaF';
+
+    // ========================================
     // DATA & CONFIG
     // ========================================
     
@@ -1900,6 +1916,110 @@
     let currentStepIndex = 0;
     let dynamicSteps = [];
     let stepHistory = [];
+
+    // ========================================
+    // SUPABASE AUTH FUNCTIONS
+    // ========================================
+    
+    async function signUpUser() {
+      try {
+        // SignUp sans confirmation email
+        const { data, error } = await supabase.auth.signUp({
+          email: state.email,
+          password: state.password,
+          options: {
+            data: {
+              prenom: state.prenom
+            },
+            emailRedirectTo: null // Pas de redirect email
+          }
+        });
+        
+        if (error) {
+          showToast('Erreur : ' + error.message);
+          console.error('Supabase signup error:', error);
+          return false;
+        }
+        
+        // Vérifier que l'utilisateur est bien connecté directement (session créée)
+        if (data.user && data.session) {
+          console.log('✅ Utilisateur connecté directement après signup');
+          
+          const quizScore = calculateQuizScore();
+          
+          // Tentative de sauvegarde dans profiles (peut échouer si la table n'existe pas encore)
+          try {
+            await supabase.from('profiles').upsert({
+              id: data.user.id,
+              prenom: state.prenom,
+              preparation: state.preparation,
+              sous_choix: state.sousChoix,
+              sous_choix2: state.sousChoix2 || '',
+              moyenne: state.moyenne,
+              objectif: state.objectif,
+              matieres_fortes: state.matieresFortes,
+              matieres_faibles: state.matieresFaibles,
+              quiz_score: quizScore,
+              updated_at: new Date().toISOString()
+            });
+          } catch (profileError) {
+            console.warn('Profile update failed (table may not exist yet):', profileError);
+          }
+          
+          // Sauvegarder aussi dans localStorage (fallback)
+          localStorage.setItem('bravoo_registered', 'true');
+          localStorage.setItem('bravoo_user', JSON.stringify({
+            prenom: state.prenom,
+            preparation: state.preparation,
+            sousChoix: state.sousChoix,
+            sousChoix2: state.sousChoix2,
+            matieresFortes: state.matieresFortes,
+            matieresFaibles: state.matieresFaibles,
+            moyenne: state.moyenne,
+            objectif: state.objectif,
+            quizScore: quizScore
+          }));
+          
+          return true;
+        } else if (data.user && !data.session) {
+          // Cas où la confirmation email est requise (ne devrait pas arriver si bien configuré)
+          console.warn('⚠️ Utilisateur créé mais pas de session (confirmation email requise)');
+          showToast('Vérifie tes emails pour confirmer ton compte');
+          return false;
+        } else {
+          showToast('Erreur lors de la création du compte');
+          return false;
+        }
+      } catch (err) {
+        console.error('Unexpected error during signup:', err);
+        showToast('Une erreur est survenue. Réessaie !');
+        return false;
+      }
+    }
+    
+    function calculateQuizScore() {
+      let correct = 0;
+      let total = 0;
+      for (const [qId, answerIdx] of Object.entries(state.quizAnswers)) {
+        total++;
+        const q = state.quizQuestions.find(q => q.id === qId);
+        if (q && answerIdx === q.correctAnswerIndex) correct++;
+      }
+      return total > 0 ? Math.round((correct / total) * 100) : 0;
+    }
+    
+    function showToast(message) {
+      // Créer un toast simple
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ef4444; color: #fff; padding: 12px 20px; border-radius: 12px; font-weight: 700; font-size: 14px; z-index: 10000; box-shadow: 0 8px 24px rgba(0,0,0,0.4);';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s';
+        toast.style.opacity = '0';
+        setTimeout(() => document.body.removeChild(toast), 300);
+      }, 3000);
+    }
 
     // ========================================
     // DYNAMIC STEPS GENERATION
@@ -2897,10 +3017,31 @@
         updatePasswordStrength(state.password);
         continuePasswordBtn.disabled = state.password.length < 6;
       });
+      
+      async function handlePasswordSubmit() {
+        if (state.password.length < 6) return;
+        
+        // Désactiver le bouton pendant l'inscription
+        continuePasswordBtn.disabled = true;
+        continuePasswordBtn.textContent = 'Création du compte...';
+        
+        // Appeler signUpUser
+        const success = await signUpUser();
+        
+        if (success) {
+          // Continuer vers l'étape suivante
+          goNext();
+        } else {
+          // Réactiver le bouton en cas d'erreur
+          continuePasswordBtn.disabled = false;
+          continuePasswordBtn.textContent = 'C\'est bon j\'ai choisi !';
+        }
+      }
+      
       passwordInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && state.password.length >= 6) goNext();
+        if (e.key === 'Enter' && state.password.length >= 6) handlePasswordSubmit();
       });
-      continuePasswordBtn.addEventListener('click', goNext);
+      continuePasswordBtn.addEventListener('click', handlePasswordSubmit);
       updatePasswordStrength(state.password);
       if (state.password.length >= 6) continuePasswordBtn.disabled = false;
     }
@@ -3088,8 +3229,27 @@
 
       // CTA
       document.getElementById('paywallCta').addEventListener('click', () => {
-        alert('Le paiement sera disponible très bientôt ! Merci de ta patience 🙏\n\nTu vas être redirigé vers ton espace pour voir la démo.');
-        window.location.href = 'dashboard.html';
+        const btn = document.getElementById('paywallCta');
+        btn.textContent = '✅ Inscription confirmée !';
+        btn.style.background = 'var(--primary)';
+        btn.disabled = true;
+        
+        // Sauvegarder en localStorage que l'user est "inscrit" (temporaire, avant Stripe)
+        localStorage.setItem('bravoo_registered', 'true');
+        localStorage.setItem('bravoo_user', JSON.stringify({
+          prenom: state.prenom,
+          preparation: state.preparation,
+          sousChoix: state.sousChoix,
+          sousChoix2: state.sousChoix2,
+          matieresFortes: state.matieresFortes,
+          matieresFaibles: state.matieresFaibles,
+          moyenne: state.moyenne,
+          objectif: state.objectif
+        }));
+        
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1500);
       });
     }
 

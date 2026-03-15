@@ -493,18 +493,84 @@
   </div>
   
   <script>
-    // Get user data
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    const prenom = userData.firstName || 'toi';
+    // Get user data from localStorage (fallback Supabase later)
+    const userData = JSON.parse(localStorage.getItem('bravoo_user') || '{}');
+    const prenom = userData.prenom || 'toi';
+    const preparation = userData.preparation || 'brevet';
+    const sousChoix = userData.sousChoix || '';
+    const matieresFortes = userData.matieresFortes || [];
+    const matieresFaibles = userData.matieresFaibles || [];
+    const moyenne = userData.moyenne || 12;
+    const objectif = userData.objectif || 15;
+    
     const hour = new Date().getHours();
     const greeting = hour < 12 ? 'Bon matin' : hour < 18 ? 'Salut' : 'Bonsoir';
     document.getElementById('greetingText').textContent = `${greeting} ${prenom} !`;
     
+    // Configuration des matières par préparation (copie depuis index.html)
+    const MATIERES_CONFIG = {
+      brevet: [
+        { key: 'mathematiques', label: 'Mathématiques', emoji: '📐' },
+        { key: 'francais', label: 'Français', emoji: '📖' },
+        { key: 'histoire_geo_emc', label: 'Histoire-Géo/EMC', emoji: '🌍' },
+        { key: 'sciences', label: 'Sciences (SVT+Physique+Techno)', emoji: '🔬' },
+        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' }
+      ],
+      bac: [
+        { key: 'mathematiques', label: 'Mathématiques', emoji: '📐' },
+        { key: 'francais', label: 'Français', emoji: '📖' },
+        { key: 'philo', label: 'Philosophie', emoji: '🤔' },
+        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' }
+      ],
+      code: [
+        { key: 'code_route', label: 'Code de la route', emoji: '🚦' },
+        { key: 'signalisation', label: 'Signalisation', emoji: '🚸' },
+        { key: 'priorites', label: 'Règles de priorité', emoji: '⚠️' },
+        { key: 'autoroute', label: 'Autoroute', emoji: '🛣️' }
+      ],
+      langue: [
+        { key: 'grammaire', label: 'Grammaire', emoji: '📖' },
+        { key: 'vocabulaire', label: 'Vocabulaire', emoji: '📚' },
+        { key: 'comprehension', label: 'Compréhension', emoji: '🎧' }
+      ],
+      orthographe: [
+        { key: 'orthographe', label: 'Orthographe', emoji: '✏️' },
+        { key: 'grammaire', label: 'Grammaire', emoji: '📖' },
+        { key: 'conjugaison', label: 'Conjugaison', emoji: '🔄' }
+      ],
+      primaire: [
+        { key: 'francais', label: 'Français', emoji: '📖' },
+        { key: 'mathematiques', label: 'Mathématiques', emoji: '🔢' },
+        { key: 'sciences', label: 'Sciences', emoji: '🔬' }
+      ]
+    };
+    
+    // Obtenir les matières du parcours utilisateur
+    const userMatieres = MATIERES_CONFIG[preparation] || MATIERES_CONFIG.brevet;
+    
+    // Adapter le titre selon le parcours
+    const preparationLabels = {
+      'brevet': 'le Brevet',
+      'bac': 'le Bac',
+      'bts': 'ton BTS',
+      'but': 'ton BUT',
+      'code': 'le Code de la route',
+      'langue': 'ton examen de langue',
+      'orthographe': 'le Certificat Voltaire',
+      'primaire': 'l\'année',
+      'concours': 'ton concours'
+    };
+    
+    const preparationLabel = preparationLabels[preparation] || 'ton objectif';
+    
     // Chat messages data
+    // Adapter le contenu selon le parcours
+    const matiereExemple = userMatieres[0] || { label: 'les bases', emoji: '📚' };
+    
     const messages = [
       {
         type: 'coach-text',
-        content: `Salut ${prenom} ! Aujourd'hui on travaille sur les équations du 1er degré. C'est une notion clé pour le brevet. On y va ?`
+        content: `Salut ${prenom} ! Aujourd'hui on travaille sur ${matiereExemple.label.toLowerCase()}. C'est une notion clé pour ${preparationLabel}. On y va ?`
       },
       {
         type: 'action',
