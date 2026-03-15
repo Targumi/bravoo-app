@@ -3161,11 +3161,30 @@
       card.innerHTML = `
         <div class="card-content">
           <button class="back-btn" onclick="goBack()">← Retour</button>
+          
+          <!-- 1. Hero bienvenue -->
           <div class="paywall-hero">
             <div class="emoji">🎉</div>
             <h2 class="title">${state.prenom}, ton espace est prêt !</h2>
           </div>
 
+          <!-- 2. Bloc prix IMMÉDIATEMENT visible -->
+          <div class="paywall-offer">
+            <div class="urgency-badge" style="text-align: center; color: var(--accent); font-weight: 700; font-size: 14px; margin-bottom: 12px;">
+              🔥 Offre de lancement : -70% jusqu'au 31 mars 2026
+            </div>
+            <div class="paywall-pricing">
+              <div class="paywall-old-price">12,99€/semaine</div>
+              <div class="paywall-new-price">3,99€</div>
+              <div class="paywall-period">/semaine</div>
+              <div class="paywall-discount">-70%</div>
+            </div>
+            <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 12px; font-weight: 600;">
+              🎯 Moins cher qu'1 heure de cours particulier (30-50€)
+            </p>
+          </div>
+
+          <!-- 3. Récap du profil (justification du prix) -->
           <div class="paywall-summary">
             <div class="paywall-summary-row">
               <span class="key">Préparation</span>
@@ -3193,6 +3212,7 @@
             </div>
           </div>
 
+          <!-- 4. Témoignage (preuve sociale) -->
           <div class="paywall-stars">★★★★★</div>
           <div class="paywall-rating">4.9/5 — 1 200+ avis</div>
 
@@ -3200,23 +3220,9 @@
             "J'étais à 11 de moyenne en maths, j'ai eu 16 au brevet grâce aux quiz de Bravoo !"
             <div class="author">— Léa, 15 ans, Toulouse</div>
           </div>
-
-          <div class="paywall-offer">
-            <div class="urgency-badge" style="text-align: center; color: var(--accent); font-weight: 700; font-size: 14px; margin-bottom: 12px;">
-              🔥 Offre de lancement : -70% jusqu'au 31 mars 2026
-            </div>
-            <div class="paywall-pricing">
-              <div class="paywall-old-price">12,99€/semaine</div>
-              <div class="paywall-new-price">3,99€</div>
-              <div class="paywall-period">/semaine</div>
-              <div class="paywall-discount">-70%</div>
-            </div>
-            <p style="text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 12px; font-weight: 600;">
-              🎯 Moins cher qu'1 heure de cours particulier (30-50€)
-            </p>
-          </div>
         </div>
 
+        <!-- 5. Bouton CTA en bas -->
         <div class="card-action">
           <button class="paywall-cta" id="paywallCta">Commencer mon programme maintenant 🚀</button>
           <div class="paywall-guarantee">
