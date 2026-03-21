@@ -2,811 +2,739 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <title>Mon programme • Bravoo</title>
-  <!--
-    ⚙️ SUPABASE & STRIPE CONFIG
-    
-    1. Supabase:
-       - auth.users → prenom (user_metadata.first_name)
-       - table: progression (user_id, matiere, score, notions_maitrisees, total_notions)
-       - table: compte (user_id, objectif_note, moyenne_actuelle)
-    
-    2. Stripe:
-       - Free tier: accès au coach preview
-       - Premium tier: coach illimité + fonctionnalités avancées
-    
-    3. localStorage fallback (mode actuel):
-       - userData.firstName
-  -->
+  <title>Mon coaching - Bravoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; background: #121212; color: #FFFFFF; overflow: hidden; }
     
-    .shell {
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      background: #121212;
+    :root {
+      --bg: #121212;
+      --bg-card: #181818;
+      --bg-card-hover: #1e1e1e;
+      --green: #1DB954;
+      --green-dim: rgba(29, 185, 84, 0.15);
+      --gold: #F5C518;
+      --white: #FFFFFF;
+      --gray: #B3B3B3;
+      --gray-dim: #535353;
+      --red: #ff4757;
+      --red-dim: rgba(255, 71, 87, 0.15);
+      --blue: #4A90D9;
+      --blue-dim: rgba(74, 144, 217, 0.15);
     }
     
-    /* Header */
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== HEADER ===== */
     .header {
-      flex-shrink: 0;
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(18, 18, 18, 0.95);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .header-logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      background: #1DB954;
+      padding: 16px 20px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
-    .header-text h1 {
-      font-size: 17px;
-      font-weight: 900;
-      color: #FFFFFF;
-    }
-    .header-text p {
-      font-size: 12px;
-      font-weight: 600;
-      color: #B3B3B3;
-      margin-top: 2px;
-    }
-    
-    /* Chat area */
-    .chat-area {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 16px 16px 80px 16px;
-      max-width: 600px;
-      width: 100%;
-      margin: 0 auto;
-    }
-    
-    /* Message bubbles */
-    .msg-coach {
-      max-width: 85%;
-      margin-bottom: 12px;
-    }
-    .msg-user {
-      max-width: 80%;
-      margin-left: auto;
-      margin-bottom: 12px;
-    }
-    
-    .bubble-coach {
-      background: #181818;
-      border-radius: 16px;
-      border-top-left-radius: 4px;
-      padding: 14px 16px;
-      color: #FFFFFF;
-      font-size: 14px;
-      line-height: 1.6;
-      font-weight: 500;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      max-width: 100%;
-    }
-    
-    .bubble-user {
-      background: #1DB954;
-      border-radius: 16px;
-      border-top-right-radius: 4px;
-      padding: 10px 16px;
-      color: #FFFFFF;
-      font-size: 14px;
-      font-weight: 700;
-      text-align: right;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      max-width: 100%;
-    }
-    
-    /* Course block */
-    .course-block {
-      background: #181818;
-      border-radius: 16px;
-      border-top-left-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      max-width: 85%;
-    }
-    .course-header {
-      padding: 12px 16px;
-      background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
-      color: #FFFFFF;
-      font-weight: 800;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .course-body {
-      padding: 14px 16px;
-    }
-    .course-bullet {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      margin-bottom: 10px;
-      font-size: 14px;
-      line-height: 1.5;
-      font-weight: 500;
-      color: #FFFFFF;
-    }
-    .course-bullet:last-child { margin-bottom: 0; }
-    .course-bullet-dot {
-      color: #1DB954;
-      font-weight: 900;
-      font-size: 16px;
-      line-height: 1.3;
-      flex-shrink: 0;
-    }
-    
-    /* Quiz block */
-    .quiz-block {
-      background: #181818;
-      border-radius: 16px;
-      border-top-left-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      max-width: 85%;
-    }
-    .quiz-header {
-      padding: 12px 16px;
-      background: rgba(29,185,84,0.15);
-      color: #1DB954;
-      font-weight: 800;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .quiz-body {
-      padding: 14px 16px;
-    }
-    .quiz-question {
-      font-weight: 700;
-      font-size: 15px;
-      margin-bottom: 12px;
-      line-height: 1.5;
-      color: #FFFFFF;
-    }
-    .quiz-choices {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .quiz-choice {
-      padding: 11px 14px;
-      border-radius: 14px;
-      border: 2px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.03);
-      cursor: pointer;
-      transition: all 0.2s;
-      font-weight: 600;
-      font-size: 13px;
-      color: #FFFFFF;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .quiz-choice:hover {
-      background: rgba(255,255,255,0.06);
-      border-color: rgba(255,255,255,0.2);
-    }
-    .quiz-choice.correct {
-      background: rgba(34,197,94,0.15);
-      border-color: #22c55e;
-    }
-    .quiz-choice.wrong {
-      background: rgba(239,68,68,0.15);
-      border-color: #ef4444;
-    }
-    .quiz-choice.disabled {
-      cursor: default;
-    }
-    .quiz-letter {
-      width: 24px;
-      height: 24px;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(29,185,84,0.2);
-      color: #1DB954;
-      font-size: 12px;
-      font-weight: 900;
-      flex-shrink: 0;
-    }
-    .quiz-choice.correct .quiz-letter {
-      background: #22c55e;
-      color: #FFFFFF;
-    }
-    .quiz-choice.wrong .quiz-letter {
-      background: #ef4444;
-      color: #FFFFFF;
-    }
-    .quiz-explanation {
-      margin-top: 12px;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      line-height: 1.5;
-    }
-    .quiz-explanation.correct {
-      background: rgba(34,197,94,0.15);
-      border: 1px solid rgba(34,197,94,0.3);
-      color: #FFFFFF;
-    }
-    .quiz-explanation.wrong {
-      background: rgba(239,68,68,0.15);
-      border: 1px solid rgba(239,68,68,0.3);
-      color: #FFFFFF;
-    }
-    
-    /* Flashcards block */
-    .flashcards-block {
-      background: #181818;
-      border-radius: 16px;
-      border-top-left-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      max-width: 85%;
-    }
-    .flashcards-header {
-      padding: 10px 16px;
-      background: rgba(245,197,24,0.15);
-      color: #F5C518;
-      font-weight: 800;
-      font-size: 12px;
-      display: flex;
       justify-content: space-between;
-      align-items: center;
     }
-    .flashcard-container {
-      padding: 28px 20px;
-      min-height: 120px;
+    .logo {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--green); }
+    .header-right {
       display: flex;
       align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      user-select: none;
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.5;
-      text-align: center;
-      transition: all 0.3s;
-    }
-    .flashcard-container.front {
-      background: rgba(29,185,84,0.1);
-      color: #FFFFFF;
-    }
-    .flashcard-container.back {
-      background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
-      color: #FFFFFF;
-    }
-    .flashcards-nav {
-      padding: 10px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .flashcards-nav button {
-      background: none;
-      border: none;
-      color: #1DB954;
-      font-weight: 800;
-      font-size: 14px;
-      cursor: pointer;
-      padding: 4px;
-    }
-    .flashcards-nav button:disabled {
-      color: rgba(255,255,255,0.2);
-      cursor: default;
-    }
-    .flashcards-nav .hint {
-      font-size: 11px;
-      color: #B3B3B3;
-      font-weight: 600;
-    }
-    
-    /* Bottom controls */
-    .bottom-controls {
-      flex-shrink: 0;
-      background: #121212;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-    
-    /* Action buttons */
-    .action-buttons {
-      padding: 12px 16px;
-      display: flex;
-      gap: 8px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    .action-btn {
-      flex: 1;
-      padding: 13px 12px;
-      border-radius: 12px;
-      border: none;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      font-family: inherit;
-      transition: transform 0.1s;
-    }
-    .action-btn:active {
-      transform: scale(0.98);
-    }
-    .action-btn.primary {
-      background: #1DB954;
-      color: #FFFFFF;
-    }
-    .action-btn.secondary {
-      background: #181818;
-      color: #FFFFFF;
-      border: 2px solid rgba(255,255,255,0.15);
-    }
-    .action-btn.secondary:hover {
-      background: #282828;
-      border-color: rgba(255,255,255,0.25);
-    }
-    
-    /* Quick actions */
-    .quick-actions {
-      padding: 8px 16px;
-      display: flex;
       gap: 12px;
-      justify-content: center;
-      max-width: 600px;
-      margin: 0 auto;
     }
-    .quick-action {
-      background: none;
-      border: none;
-      color: #B3B3B3;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      padding: 6px 10px;
+    .streak-badge {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 4px;
-      font-family: inherit;
+      gap: 6px;
     }
-    
-    /* Bottom nav */
-    .bottom-nav-wrap {
-      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    .streak-fire { color: #FF6B35; }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      color: var(--bg);
     }
-    .bottom-nav {
+
+    /* ===== MAIN ===== */
+    .main {
       max-width: 600px;
       margin: 0 auto;
-      background: #181818;
+      padding: 24px 20px 100px;
+    }
+
+    /* ===== SALUTATION ===== */
+    .salutation {
+      margin-bottom: 28px;
+    }
+    .salutation h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    .salutation p {
+      color: var(--gray);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ===== SESSION CARD ===== */
+    .session-card {
+      background: var(--bg-card);
       border: 1px solid rgba(255,255,255,0.06);
       border-radius: 16px;
-      padding: 6px;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 6px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .session-header {
+      background: linear-gradient(135deg, var(--green), #15803d);
+      padding: 20px 24px;
+    }
+    .session-tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    .session-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 6px;
+    }
+    .session-meta {
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      display: flex;
+      gap: 16px;
+    }
+    .session-body {
+      padding: 24px;
+    }
+    .session-body p {
+      color: var(--gray);
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .session-body h3 {
+      color: var(--white);
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      margin-top: 8px;
+    }
+    .points-cles {
+      list-style: none;
+      margin-bottom: 20px;
+    }
+    .points-cles li {
+      padding: 10px 16px;
+      background: var(--green-dim);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .points-cles li::before {
+      content: '\2713';
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    /* ===== QUIZ ===== */
+    .quiz-section {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .quiz-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .quiz-header h2 {
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .quiz-progress {
+      font-size: 13px;
+      color: var(--gray);
+      font-weight: 600;
+    }
+    .quiz-question {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .quiz-option {
+      background: var(--bg);
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--white);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+    .quiz-option:hover {
+      border-color: var(--green);
+      background: var(--green-dim);
+    }
+    .quiz-option.correct {
+      border-color: var(--green);
+      background: var(--green-dim);
+      color: var(--green);
+    }
+    .quiz-option.wrong {
+      border-color: var(--red);
+      background: var(--red-dim);
+      color: var(--red);
+    }
+    .quiz-option.disabled {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    .quiz-explication {
+      margin-top: 14px;
+      padding: 14px 18px;
+      background: var(--blue-dim);
+      border-radius: 12px;
+      color: var(--blue);
+      font-size: 14px;
+      line-height: 1.5;
+      display: none;
+    }
+    .quiz-explication.show { display: block; }
+    .quiz-next {
+      margin-top: 16px;
+      width: 100%;
+      padding: 14px;
+      background: var(--green);
+      color: var(--bg);
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: none;
+    }
+    .quiz-next.show { display: block; }
+    .quiz-next:hover { opacity: 0.9; }
+
+    /* ===== RESULT ===== */
+    .quiz-result {
+      text-align: center;
+      padding: 40px 20px;
+      display: none;
+    }
+    .quiz-result.show { display: block; }
+    .result-score {
+      font-size: 56px;
+      font-weight: 900;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+    .result-text {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .result-detail {
+      color: var(--gray);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    /* ===== CONSEIL ===== */
+    .conseil-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .conseil-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .conseil-card p {
+      color: var(--gray);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .next-session {
+      background: var(--green-dim);
+      border: 1px solid rgba(29, 185, 84, 0.2);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-top: 14px;
+      font-size: 14px;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    /* ===== LOADING ===== */
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      text-align: center;
+    }
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--bg-card);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 24px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .loading-sub {
+      color: var(--gray);
+      font-size: 14px;
+    }
+    .loading-messages {
+      margin-top: 20px;
+      color: var(--gray);
+      font-size: 13px;
+      min-height: 20px;
+    }
+
+    /* ===== ERROR ===== */
+    .error-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .error-screen h2 { margin-bottom: 12px; }
+    .error-screen p { color: var(--gray); margin-bottom: 24px; font-size: 15px; }
+    .retry-btn {
+      padding: 14px 32px;
+      background: var(--green);
+      color: var(--bg);
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ===== BOTTOM NAV ===== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(18, 18, 18, 0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+      z-index: 100;
     }
     .nav-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       gap: 4px;
-      min-height: 54px;
-      border-radius: 12px;
-      text-decoration: none;
       font-size: 11px;
-      font-weight: 800;
-      padding: 6px 4px;
-      transition: all 0.2s;
+      font-weight: 600;
+      color: var(--gray-dim);
+      text-decoration: none;
+      padding: 4px 16px;
     }
-    .nav-item.active {
-      background: #1DB954;
-      color: #FFFFFF;
-    }
-    .nav-item:not(.active) {
-      color: #B3B3B3;
-    }
-    .nav-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: 9px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 900;
-    }
-    .nav-item.active .nav-icon {
-      background: rgba(255,255,255,0.2);
-    }
-    .nav-item:not(.active) .nav-icon {
-      background: rgba(255,255,255,0.05);
-    }
-    
-    .hidden { display: none !important; }
+    .nav-item.active { color: var(--green); }
+    .nav-icon { font-size: 22px; }
   </style>
 </head>
 <body>
-  <div class="shell">
-    <!-- Header -->
-    <div class="header">
-      <div class="header-logo">🎓</div>
-      <div class="header-text">
-        <h1>Mon programme</h1>
-        <p id="greetingText">Salut !</p>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">Brav<span>oo</span></div>
+    <div class="header-right">
+      <div class="streak-badge">
+        <span class="streak-fire">&#x1F525;</span>
+        <span id="streakCount">1</span> jour
       </div>
+      <div class="avatar" id="avatarInitial">?</div>
     </div>
-    
-    <!-- Chat area -->
-    <div class="chat-area" id="chatArea">
-      <!-- Messages will be injected here -->
+  </div>
+
+  <!-- LOADING -->
+  <div class="main">
+    <div id="loadingScreen" class="loading-screen">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Preparation de ta session...</div>
+      <div class="loading-sub">L'IA analyse ton profil</div>
+      <div class="loading-messages" id="loadingMsg"></div>
     </div>
-    
-    <!-- Bottom controls -->
-    <div class="bottom-controls">
-      <!-- Action buttons (hidden initially) -->
-      <div class="action-buttons hidden" id="actionButtons">
-        <button class="action-btn primary" id="actionBtn1"></button>
-        <button class="action-btn secondary" id="actionBtn2"></button>
-      </div>
+
+    <!-- ERROR -->
+    <div id="errorScreen" class="error-screen">
+      <h2>Oups !</h2>
+      <p>Le coach IA est momentanement indisponible. Reessaie dans quelques secondes.</p>
+      <button class="retry-btn" onclick="loadSession()">Reessayer</button>
+    </div>
+
+    <!-- CONTENT (hidden until loaded) -->
+    <div id="contentScreen" style="display:none;">
       
-      <!-- Quick actions -->
-      <div class="quick-actions">
-        <button class="quick-action" id="questionBtn">💬 Poser une question</button>
-        <button class="quick-action" id="skipBtn">⏭️ Passer à autre chose</button>
+      <!-- Salutation -->
+      <div class="salutation">
+        <h1 id="salutationTitle"></h1>
+        <p id="salutationText"></p>
       </div>
-      
-      <!-- Bottom nav -->
-      <div class="bottom-nav-wrap">
-        <div class="bottom-nav">
-          <a href="dashboard.html" class="nav-item active">
-            <span class="nav-icon">🎯</span>
-            <span>Mon programme</span>
-          </a>
-          <a href="progression.html" class="nav-item">
-            <span class="nav-icon">📊</span>
-            <span>Ma progression</span>
-          </a>
+
+      <!-- Session / Lecon -->
+      <div class="session-card">
+        <div class="session-header">
+          <div class="session-tag">Session du jour</div>
+          <div class="session-title" id="leconTitre"></div>
+          <div class="session-meta">
+            <span id="leconMatiere"></span>
+            <span id="leconDuree"></span>
+          </div>
         </div>
+        <div class="session-body">
+          <div id="leconContenu"></div>
+          <h3>A retenir</h3>
+          <ul class="points-cles" id="pointsCles"></ul>
+        </div>
+      </div>
+
+      <!-- Quiz -->
+      <div class="quiz-section" id="quizSection">
+        <div class="quiz-header">
+          <h2>Quiz</h2>
+          <span class="quiz-progress" id="quizProgress">1/5</span>
+        </div>
+        <div class="quiz-question" id="quizQuestion"></div>
+        <div class="quiz-options" id="quizOptions"></div>
+        <div class="quiz-explication" id="quizExplication"></div>
+        <button class="quiz-next" id="quizNext" onclick="nextQuestion()">Question suivante</button>
+      </div>
+
+      <!-- Quiz Result -->
+      <div class="quiz-result" id="quizResult">
+        <div class="result-score" id="resultScore"></div>
+        <div class="result-text" id="resultText"></div>
+        <div class="result-detail" id="resultDetail"></div>
+      </div>
+
+      <!-- Conseil -->
+      <div class="conseil-card" id="conseilCard">
+        <h3>&#x1F4A1; Conseil du coach</h3>
+        <p id="conseilText"></p>
+        <div class="next-session" id="nextSession"></div>
       </div>
     </div>
   </div>
-  
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item active">
+      <span class="nav-icon">&#x1F3AF;</span>
+      Coaching
+    </a>
+    <a href="progression.html" class="nav-item">
+      <span class="nav-icon">&#x1F4CA;</span>
+      Progres
+    </a>
+    <a href="#" class="nav-item" onclick="loadSession(); return false;">
+      <span class="nav-icon">&#x1F504;</span>
+      Nouvelle session
+    </a>
+  </nav>
+
   <script>
-    // Vérifier si l'utilisateur a payé
-    const urlParams = new URLSearchParams(window.location.search);
-    const justPaid = urlParams.get('paid') === 'true';
-    const hasAccess = localStorage.getItem('bravoo_paid') === 'true';
+    // ===== USER DATA FROM ONBOARDING =====
+    const userData = JSON.parse(localStorage.getItem('bravooUser') || '{}');
+    const prenom = userData.firstName || userData.prenom || 'Ami(e)';
+    const situation = userData.situation || userData.parcours || 'Brevet';
+    const niveau = userData.niveau || 'moyen';
+    const objectif = userData.objectif || 'reussir mon examen';
 
-    if (justPaid) {
-      localStorage.setItem('bravoo_paid', 'true');
-    } else if (!hasAccess) {
-      // Pas d'accès → rediriger vers l'onboarding
-      window.location.href = 'index.html';
+    // Set avatar
+    document.getElementById('avatarInitial').textContent = prenom.charAt(0).toUpperCase();
+    
+    // Streak from localStorage
+    const today = new Date().toDateString();
+    let streak = JSON.parse(localStorage.getItem('bravooStreak') || '{"count":0,"lastDate":""}');
+    if (streak.lastDate === today) {
+      // Already visited today
+    } else if (streak.lastDate === new Date(Date.now() - 86400000).toDateString()) {
+      streak.count++;
+      streak.lastDate = today;
+    } else {
+      streak.count = 1;
+      streak.lastDate = today;
     }
-    
-    // Get user data from localStorage (fallback Supabase later)
-    const userData = JSON.parse(localStorage.getItem('bravoo_user') || '{}');
-    const prenom = userData.prenom || 'toi';
-    const preparation = userData.preparation || 'brevet';
-    const sousChoix = userData.sousChoix || '';
-    const matieresFortes = userData.matieresFortes || [];
-    const matieresFaibles = userData.matieresFaibles || [];
-    const moyenne = userData.moyenne || 12;
-    const objectif = userData.objectif || 15;
-    
-    const hour = new Date().getHours();
-    const greeting = hour < 12 ? 'Bon matin' : hour < 18 ? 'Salut' : 'Bonsoir';
-    document.getElementById('greetingText').textContent = `${greeting} ${prenom} !`;
-    
-    // Configuration des matières par préparation (copie depuis index.html)
-    const MATIERES_CONFIG = {
-      brevet: [
-        { key: 'mathematiques', label: 'Mathématiques', emoji: '📐' },
-        { key: 'francais', label: 'Français', emoji: '📖' },
-        { key: 'histoire_geo_emc', label: 'Histoire-Géo/EMC', emoji: '🌍' },
-        { key: 'sciences', label: 'Sciences (SVT+Physique+Techno)', emoji: '🔬' },
-        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' }
-      ],
-      bac: [
-        { key: 'mathematiques', label: 'Mathématiques', emoji: '📐' },
-        { key: 'francais', label: 'Français', emoji: '📖' },
-        { key: 'philo', label: 'Philosophie', emoji: '🤔' },
-        { key: 'anglais', label: 'Anglais', emoji: '🇬🇧' }
-      ],
-      code: [
-        { key: 'code_route', label: 'Code de la route', emoji: '🚦' },
-        { key: 'signalisation', label: 'Signalisation', emoji: '🚸' },
-        { key: 'priorites', label: 'Règles de priorité', emoji: '⚠️' },
-        { key: 'autoroute', label: 'Autoroute', emoji: '🛣️' }
-      ],
-      langue: [
-        { key: 'grammaire', label: 'Grammaire', emoji: '📖' },
-        { key: 'vocabulaire', label: 'Vocabulaire', emoji: '📚' },
-        { key: 'comprehension', label: 'Compréhension', emoji: '🎧' }
-      ],
-      orthographe: [
-        { key: 'orthographe', label: 'Orthographe', emoji: '✏️' },
-        { key: 'grammaire', label: 'Grammaire', emoji: '📖' },
-        { key: 'conjugaison', label: 'Conjugaison', emoji: '🔄' }
-      ],
-      primaire: [
-        { key: 'francais', label: 'Français', emoji: '📖' },
-        { key: 'mathematiques', label: 'Mathématiques', emoji: '🔢' },
-        { key: 'sciences', label: 'Sciences', emoji: '🔬' }
-      ]
-    };
-    
-    // Obtenir les matières du parcours utilisateur
-    const userMatieres = MATIERES_CONFIG[preparation] || MATIERES_CONFIG.brevet;
-    
-    // Adapter le titre selon le parcours
-    const preparationLabels = {
-      'brevet': 'le Brevet',
-      'bac': 'le Bac',
-      'bts': 'ton BTS',
-      'but': 'ton BUT',
-      'code': 'le Code de la route',
-      'langue': 'ton examen de langue',
-      'orthographe': 'le Certificat Voltaire',
-      'primaire': 'l\'année',
-      'concours': 'ton concours'
-    };
-    
-    const preparationLabel = preparationLabels[preparation] || 'ton objectif';
-    
-    // Chat messages data
-    // Message de bienvenue personnalisé
-    const matieresFortesList = matieresFortes.map(k => userMatieres.find(m => m.key === k)?.label).filter(Boolean);
-    const matieresFaiblesList = matieresFaibles.map(k => userMatieres.find(m => m.key === k)?.label).filter(Boolean);
-    
-    const fortsText = matieresFortesList.length > 0 ? matieresFortesList.join(', ') : 'Non défini';
-    const faiblesText = matieresFaiblesList.length > 0 ? matieresFaiblesList.join(', ') : 'Non défini';
-    
-    const welcomeMessage = `Salut ${prenom} ! 👋
+    localStorage.setItem('bravooStreak', JSON.stringify(streak));
+    document.getElementById('streakCount').textContent = streak.count;
 
-Bienvenue sur Bravoo ! Je suis ton coach IA personnel et je vais t'accompagner pour réussir ${preparationLabel}.
+    // ===== QUIZ STATE =====
+    let quizData = [];
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
 
-D'après ton profil :
-✅ Tes points forts : ${fortsText}
-📚 Tes lacunes : ${faiblesText}
-
-On va travailler ensemble pour renforcer tes points faibles tout en consolidant tes acquis.
-
-Prêt à commencer ?`;
-    
-    const messages = [
-      {
-        type: 'coach-text',
-        content: welcomeMessage
-      },
-      {
-        type: 'cta-button'
-      }
+    // ===== LOADING MESSAGES =====
+    const loadingMessages = [
+      'Analyse de ton profil...',
+      'Identification de tes points faibles...',
+      'Selection de la meilleure lecon pour toi...',
+      'Preparation du quiz personnalise...',
+      'Ta session est presque prete !'
     ];
-    
-    // Render messages
-    const chatArea = document.getElementById('chatArea');
-    
-    messages.forEach((msg, idx) => {
-      if (msg.type === 'coach-text') {
-        const div = document.createElement('div');
-        div.className = 'msg-coach';
-        div.innerHTML = `<div class="bubble-coach" style="white-space: pre-line;">${msg.content}</div>`;
-        chatArea.appendChild(div);
-      }
-      else if (msg.type === 'cta-button') {
-        const div = document.createElement('div');
-        div.className = 'msg-coach';
-        div.innerHTML = `
-          <div style="margin-top: 8px;">
-            <button class="btn" id="ctaSessionBtn" style="width: 100%; max-width: 320px; padding: 14px 20px; border-radius: 12px; border: none; background: #1DB954; color: #FFFFFF; font-size: 15px; font-weight: 900; cursor: pointer; font-family: inherit; box-shadow: 0 8px 24px rgba(29, 185, 84, 0.3);">
-              Commencer ma première session 🚀
-            </button>
-          </div>
-        `;
-        chatArea.appendChild(div);
-        
-        // Ajouter le comportement du bouton
-        setTimeout(() => {
-          const ctaBtn = document.getElementById('ctaSessionBtn');
-          if (ctaBtn) {
-            ctaBtn.addEventListener('click', () => {
-              showToast('Le coach IA arrive très bientôt ! 🚀');
-            });
-          }
-        }, 100);
-      }
-      else if (msg.type === 'user') {
-        const div = document.createElement('div');
-        div.className = 'msg-user';
-        div.innerHTML = `<div class="bubble-user">${msg.content}</div>`;
-        chatArea.appendChild(div);
-      }
-      else if (msg.type === 'course') {
-        const div = document.createElement('div');
-        div.className = 'msg-coach';
-        const bulletsHTML = msg.bullets.map(b => 
-          `<div class="course-bullet"><span class="course-bullet-dot">•</span><span>${b}</span></div>`
-        ).join('');
-        div.innerHTML = `
-          <div class="course-block">
-            <div class="course-header">${msg.title}</div>
-            <div class="course-body">${bulletsHTML}</div>
-          </div>
-        `;
-        chatArea.appendChild(div);
-      }
-      else if (msg.type === 'quiz') {
-        const div = document.createElement('div');
-        div.className = 'msg-coach';
-        const choicesHTML = msg.choices.map((choice, i) => 
-          `<div class="quiz-choice" data-index="${i}">
-            <span class="quiz-letter">${String.fromCharCode(65 + i)}</span>
-            <span>${choice}</span>
-          </div>`
-        ).join('');
-        div.innerHTML = `
-          <div class="quiz-block">
-            <div class="quiz-header">❓ Quiz</div>
-            <div class="quiz-body">
-              <div class="quiz-question">${msg.question}</div>
-              <div class="quiz-choices">${choicesHTML}</div>
-            </div>
-          </div>
-        `;
-        chatArea.appendChild(div);
-        
-        // Add quiz interaction
-        let answered = false;
-        const choices = div.querySelectorAll('.quiz-choice');
-        const quizBody = div.querySelector('.quiz-body');
-        choices.forEach((choice, i) => {
-          choice.addEventListener('click', () => {
-            if (answered) return;
-            answered = true;
-            const isCorrect = i === msg.correctIndex;
-            
-            choices.forEach((c, j) => {
-              c.classList.add('disabled');
-              if (j === msg.correctIndex) c.classList.add('correct');
-              else if (j === i) c.classList.add('wrong');
-            });
-            
-            const explanation = document.createElement('div');
-            explanation.className = `quiz-explanation ${isCorrect ? 'correct' : 'wrong'}`;
-            explanation.textContent = (isCorrect ? 'Bien joué ! ' : 'Pas tout à fait. ') + msg.explanation;
-            quizBody.appendChild(explanation);
-          });
-        });
-      }
-      else if (msg.type === 'flashcards') {
-        const div = document.createElement('div');
-        div.className = 'msg-coach';
-        div.innerHTML = `
-          <div class="flashcards-block">
-            <div class="flashcards-header">
-              <span>🃏 Flashcards</span>
-              <span class="card-counter">1/${msg.cards.length}</span>
-            </div>
-            <div class="flashcard-container front">${msg.cards[0].front}</div>
-            <div class="flashcards-nav">
-              <button class="prev-btn" disabled>← Précédent</button>
-              <span class="hint">Tape pour retourner</span>
-              <button class="next-btn">Suivant →</button>
-            </div>
-          </div>
-        `;
-        chatArea.appendChild(div);
-        
-        // Add flashcard interaction
-        let currentIndex = 0;
-        let flipped = false;
-        const container = div.querySelector('.flashcard-container');
-        const counter = div.querySelector('.card-counter');
-        const prevBtn = div.querySelector('.prev-btn');
-        const nextBtn = div.querySelector('.next-btn');
-        
-        function updateCard() {
-          const card = msg.cards[currentIndex];
-          container.textContent = flipped ? card.back : card.front;
-          container.className = `flashcard-container ${flipped ? 'back' : 'front'}`;
-          counter.textContent = `${currentIndex + 1}/${msg.cards.length}`;
-          prevBtn.disabled = currentIndex === 0;
-          nextBtn.disabled = currentIndex === msg.cards.length - 1;
+
+    function animateLoading() {
+      let i = 0;
+      const msgEl = document.getElementById('loadingMsg');
+      const interval = setInterval(() => {
+        if (i < loadingMessages.length) {
+          msgEl.textContent = loadingMessages[i];
+          i++;
+        } else {
+          clearInterval(interval);
         }
-        
-        container.addEventListener('click', () => {
-          flipped = !flipped;
-          updateCard();
-        });
-        
-        prevBtn.addEventListener('click', () => {
-          if (currentIndex > 0) {
-            currentIndex--;
-            flipped = false;
-            updateCard();
-          }
-        });
-        
-        nextBtn.addEventListener('click', () => {
-          if (currentIndex < msg.cards.length - 1) {
-            currentIndex++;
-            flipped = false;
-            updateCard();
-          }
-        });
-      }
-      else if (msg.type === 'action') {
-        // Store for bottom buttons
-        if (idx === messages.length - 2) { // "Exercices avancés" action
-          setTimeout(() => {
-            const actionButtons = document.getElementById('actionButtons');
-            const btn1 = document.getElementById('actionBtn1');
-            const btn2 = document.getElementById('actionBtn2');
-            btn1.textContent = msg.options[0];
-            btn2.textContent = msg.options[1];
-            actionButtons.classList.remove('hidden');
-          }, 100);
-        }
-      }
-    });
-    
-    // Quick actions
-    document.getElementById('questionBtn').addEventListener('click', () => {
-      alert('Le coach IA sera disponible très bientôt !');
-    });
-    
-    document.getElementById('skipBtn').addEventListener('click', () => {
-      alert('Le coach IA sera disponible très bientôt !');
-    });
-    
-    // Action buttons
-    document.getElementById('actionBtn1').addEventListener('click', () => {
-      alert('Le coach IA sera disponible très bientôt !');
-    });
-    
-    document.getElementById('actionBtn2').addEventListener('click', () => {
-      alert('Le coach IA sera disponible très bientôt !');
-    });
-    
-    // Auto-scroll to bottom
-    setTimeout(() => {
-      chatArea.scrollTop = chatArea.scrollHeight;
-    }, 100);
-    
-    // Toast function
-    function showToast(message) {
-      const toast = document.createElement('div');
-      toast.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1DB954; color: #fff; padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; z-index: 10000; box-shadow: 0 8px 24px rgba(0,0,0,0.4);';
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      setTimeout(() => {
-        toast.style.transition = 'opacity 0.3s';
-        toast.style.opacity = '0';
-        setTimeout(() => document.body.removeChild(toast), 300);
-      }, 3000);
+      }, 1500);
+      return interval;
     }
+
+    // ===== LOAD SESSION =====
+    async function loadSession() {
+      document.getElementById('loadingScreen').style.display = 'flex';
+      document.getElementById('errorScreen').style.display = 'none';
+      document.getElementById('contentScreen').style.display = 'none';
+      
+      const loadingInterval = animateLoading();
+
+      try {
+        const res = await fetch('/api/coach', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prenom,
+            situation,
+            niveau,
+            objectif,
+            matiere: userData.matiere || null,
+            historique: localStorage.getItem('bravooLastSession') || null
+          })
+        });
+
+        if (!res.ok) throw new Error('API error');
+        
+        const session = await res.json();
+        
+        clearInterval(loadingInterval);
+        
+        // Store for next session context
+        localStorage.setItem('bravooLastSession', session.lecon?.titre || '');
+        
+        renderSession(session);
+      } catch (err) {
+        clearInterval(loadingInterval);
+        console.error('Failed to load session:', err);
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('errorScreen').style.display = 'flex';
+      }
+    }
+
+    // ===== RENDER SESSION =====
+    function renderSession(session) {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('contentScreen').style.display = 'block';
+
+      // Salutation
+      document.getElementById('salutationTitle').textContent = `Salut ${prenom} !`;
+      document.getElementById('salutationText').textContent = session.salutation || 'Ta session du jour est prete. C\'est parti !';
+
+      // Lecon
+      document.getElementById('leconTitre').textContent = session.lecon?.titre || 'Lecon du jour';
+      document.getElementById('leconMatiere').textContent = session.lecon?.matiere || situation;
+      document.getElementById('leconDuree').textContent = session.lecon?.duree || '15 min';
+      
+      // Render contenu with paragraphs
+      const contenu = session.lecon?.contenu || '';
+      const paragraphs = contenu.split('\n').filter(p => p.trim());
+      document.getElementById('leconContenu').innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+
+      // Points cles
+      const pointsCles = session.lecon?.points_cles || [];
+      document.getElementById('pointsCles').innerHTML = pointsCles.map(p => `<li>${p}</li>`).join('');
+
+      // Quiz
+      quizData = session.quiz || [];
+      currentQuestion = 0;
+      score = 0;
+      if (quizData.length > 0) {
+        document.getElementById('quizSection').style.display = 'block';
+        document.getElementById('quizResult').style.display = 'none';
+        renderQuestion();
+      } else {
+        document.getElementById('quizSection').style.display = 'none';
+      }
+
+      // Conseil
+      document.getElementById('conseilText').textContent = session.conseil || '';
+      document.getElementById('nextSession').textContent = session.prochaine_session ? `Demain : ${session.prochaine_session}` : 'A demain pour une nouvelle session !';
+    }
+
+    // ===== QUIZ LOGIC =====
+    function renderQuestion() {
+      if (currentQuestion >= quizData.length) {
+        showResult();
+        return;
+      }
+
+      answered = false;
+      const q = quizData[currentQuestion];
+      document.getElementById('quizProgress').textContent = `${currentQuestion + 1}/${quizData.length}`;
+      document.getElementById('quizQuestion').textContent = q.question;
+      document.getElementById('quizExplication').classList.remove('show');
+      document.getElementById('quizNext').classList.remove('show');
+
+      const optionsEl = document.getElementById('quizOptions');
+      optionsEl.innerHTML = q.options.map((opt, i) => {
+        const letter = String.fromCharCode(65 + i);
+        return `<button class="quiz-option" onclick="selectAnswer('${letter}', this)">${opt}</button>`;
+      }).join('');
+    }
+
+    function selectAnswer(letter, el) {
+      if (answered) return;
+      answered = true;
+
+      const q = quizData[currentQuestion];
+      const correct = q.reponse.charAt(0).toUpperCase();
+      const options = document.querySelectorAll('.quiz-option');
+      
+      options.forEach((opt, i) => {
+        const optLetter = String.fromCharCode(65 + i);
+        if (optLetter === correct) {
+          opt.classList.add('correct');
+        }
+        if (opt === el && letter !== correct) {
+          opt.classList.add('wrong');
+        }
+        opt.classList.add('disabled');
+      });
+
+      if (letter === correct) score++;
+
+      // Show explanation
+      const expEl = document.getElementById('quizExplication');
+      expEl.textContent = q.explication || '';
+      expEl.classList.add('show');
+
+      // Show next button
+      document.getElementById('quizNext').classList.add('show');
+      document.getElementById('quizNext').textContent = 
+        currentQuestion === quizData.length - 1 ? 'Voir mes resultats' : 'Question suivante';
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      renderQuestion();
+    }
+
+    function showResult() {
+      document.getElementById('quizSection').style.display = 'none';
+      const resultEl = document.getElementById('quizResult');
+      resultEl.style.display = 'block';
+      resultEl.classList.add('show');
+
+      const pct = Math.round((score / quizData.length) * 100);
+      document.getElementById('resultScore').textContent = `${pct}%`;
+      
+      let text, detail;
+      if (pct >= 80) {
+        text = 'Excellent !';
+        detail = `${score}/${quizData.length} bonnes reponses. Tu maitrises bien cette notion !`;
+      } else if (pct >= 60) {
+        text = 'Bien joue !';
+        detail = `${score}/${quizData.length} bonnes reponses. Continue comme ca, tu progresses !`;
+      } else {
+        text = 'On continue !';
+        detail = `${score}/${quizData.length} bonnes reponses. Pas de souci, on va retravailler ca ensemble.`;
+      }
+      
+      document.getElementById('resultText').textContent = text;
+      document.getElementById('resultDetail').textContent = detail;
+    }
+
+    // ===== INIT =====
+    loadSession();
   </script>
 </body>
 </html>
