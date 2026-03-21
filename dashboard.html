@@ -579,22 +579,77 @@
       const loadingInterval = animateLoading();
 
       try {
-        const res = await fetch('/api/coach', {
+        const systemPrompt = `Tu es le coach IA de Bravoo, une application de coaching scolaire personnalise.
+
+TON ROLE :
+- Tu es un prof particulier bienveillant, encourageant et structure
+- Tu tutoies l'eleve, tu es chaleureux mais professionnel
+- Tu adaptes ton niveau de langage a l'eleve (college = simple, lycee = plus pousse)
+- Tu donnes des explications claires avec des exemples concrets du programme officiel francais
+
+FORMAT DE REPONSE (JSON strict) :
+{
+  "salutation": "Message personnalise pour l'eleve (1-2 phrases motivantes)",
+  "lecon": {
+    "titre": "Titre de la lecon du jour",
+    "matiere": "La matiere",
+    "duree": "15 min",
+    "contenu": "Explication complete de la notion (400-600 mots). Claire, structuree, avec exemples. Utilise des paragraphes courts separes par des sauts de ligne. Adapte au niveau de l'eleve.",
+    "points_cles": ["Point 1", "Point 2", "Point 3", "Point 4"]
+  },
+  "quiz": [
+    {"question": "Q1", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "reponse": "A", "explication": "..."},
+    {"question": "Q2", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "reponse": "B", "explication": "..."},
+    {"question": "Q3", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "reponse": "C", "explication": "..."},
+    {"question": "Q4", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "reponse": "D", "explication": "..."},
+    {"question": "Q5", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "reponse": "A", "explication": "..."}
+  ],
+  "conseil": "Un conseil personnalise pour progresser (2-3 phrases)",
+  "prochaine_session": "Apercu de ce qu'on fera demain (1 phrase)"
+}
+
+REGLES :
+- Le contenu doit etre PERTINENT pour le programme officiel francais
+- Les questions du quiz doivent etre progressives (facile -> difficile)
+- Chaque question a exactement 4 options
+- Reponds UNIQUEMENT en JSON valide, rien d'autre`;
+
+        const userPrompt = `Profil de l'eleve :
+- Prenom : ${prenom}
+- Situation : ${situation}
+- Niveau auto-evalue : ${niveau}
+- Objectif : ${objectif}
+- Matiere demandee : ${userData.matiere || 'la matiere la plus importante pour son examen'}
+${localStorage.getItem('bravooLastSession') ? '- Derniere lecon : ' + localStorage.getItem('bravooLastSession') : '- Premiere session'}
+
+Genere une session de coaching complete pour aujourd'hui.`;
+
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Authorization': 'Bearer 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',
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://app.bravoo.fr',
+            'X-Title': 'Bravoo Coach IA'
+          },
           body: JSON.stringify({
-            prenom,
-            situation,
-            niveau,
-            objectif,
-            matiere: userData.matiere || null,
-            historique: localStorage.getItem('bravooLastSession') || null
+            model: 'openai/gpt-4.1-mini',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt }
+            ],
+            max_tokens: 2000,
+            temperature: 0.7,
+            response_format: { type: 'json_object' }
           })
         });
 
         if (!res.ok) throw new Error('API error');
+        const data = await res.json();
         
-        const session = await res.json();
+        if (data.error) throw new Error(data.error.message);
+        
+        const session = JSON.parse(data.choices[0].message.content);
         
         clearInterval(loadingInterval);
         
