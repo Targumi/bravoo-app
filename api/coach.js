@@ -1,7 +1,7 @@
 // Bravoo AI Coach - Vercel Serverless Function
 // Calls GPT-4.1 mini via OpenRouter to generate personalized coaching sessions
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
