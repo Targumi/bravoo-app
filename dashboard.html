@@ -627,10 +627,7 @@ Genere une session de coaching complete pour aujourd'hui.`;
         const res = await fetch('/api/ai', {
           method: 'POST',
           headers: {
-            'Authorization': 'Bearer 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',
-            'Content-Type': 'application/json',
-            'HTTP-Referer': 'https://app.bravoo.fr',
-            'X-Title': 'Bravoo Coach IA'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             model: 'openai/gpt-4.1-mini',
