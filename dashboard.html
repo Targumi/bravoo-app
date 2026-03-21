@@ -625,10 +625,13 @@ ${localStorage.getItem('bravooLastSession') ? '- Derniere lecon : ' + localStora
 
 Genere une session de coaching complete pour aujourd'hui.`;
 
-        const res = await fetch('/api/ai', {
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Authorization': 'Bearer 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',
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://app.bravoo.fr',
+            'X-Title': 'Bravoo Coach IA'
           },
           body: JSON.stringify({
             model: 'openai/gpt-4.1-mini',
