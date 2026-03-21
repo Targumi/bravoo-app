@@ -1,6 +1,6 @@
 export const config = { runtime: 'edge' };
 
-const OPENROUTER_KEY = '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';
+const OPENROUTER_KEY = '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';
 
 export default async function handler(req) {
   if (req.method === 'OPTIONS') {
