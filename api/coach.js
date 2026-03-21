@@ -95,7 +95,7 @@ Genere une session de coaching complete pour aujourd'hui. Choisis la notion la p
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || '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'}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://app.bravoo.fr',
         'X-Title': 'Bravoo Coach IA'
