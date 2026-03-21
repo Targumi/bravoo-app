@@ -515,6 +515,7 @@
     </a>
   </nav>
 
+  <script src="sessions.js"></script>
   <script>
     // ===== USER DATA FROM ONBOARDING =====
     const userData = JSON.parse(localStorage.getItem('bravooUser') || '{}');
@@ -656,9 +657,28 @@ Genere une session de coaching complete pour aujourd'hui.`;
         renderSession(session);
       } catch (err) {
         clearInterval(loadingInterval);
-        console.error('Failed to load session:', err);
-        document.getElementById('loadingScreen').style.display = 'none';
-        document.getElementById('errorScreen').style.display = 'flex';
+        console.warn('AI API unavailable, using pre-generated session:', err);
+        
+        // Fallback to pre-generated sessions
+        const sitKey = situation.toLowerCase().includes('brevet') ? 'brevet' : 
+                       situation.toLowerCase().includes('bac') ? 'brevet' : 'brevet';
+        const pool = (typeof SESSIONS !== 'undefined' && SESSIONS[sitKey]) ? SESSIONS[sitKey] : null;
+        
+        if (pool && pool.length > 0) {
+          // Pick a session based on day of year (consistent per day, different each day)
+          const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+          const sessionIndex = dayOfYear % pool.length;
+          const session = pool[sessionIndex];
+          
+          // Personalize the salutation
+          session.salutation = session.salutation.replace(/Ami\(e\)/g, prenom);
+          
+          localStorage.setItem('bravooLastSession', session.lecon?.titre || '');
+          renderSession(session);
+        } else {
+          document.getElementById('loadingScreen').style.display = 'none';
+          document.getElementById('errorScreen').style.display = 'flex';
+        }
       }
     }
 
